@@ -1,0 +1,132 @@
+---
+title: Dashboard Overview
+description: View your subscription totals, filter by list, and switch between monthly and yearly views
+---
+
+The Dashboard is your home screen in Recur, providing a complete overview of your recurring expenses with interactive charts, filtering options, and customizable views.
+
+## Dashboard Layout
+
+When you open Recur, you'll see:
+
+1. **Personalized Greeting**: A time-of-day greeting with your name
+2. **Add Subscription Button**: Orange + icon in the top-right corner
+3. **View Mode Toggle**: Switch between Monthly and Yearly views
+4. **Chart Visualization**: Animated chart showing your total expenses
+5. **List Filter**: Filter chip to view specific lists or all subscriptions
+6. **Subscription Cards**: Scrollable list of all your subscriptions
+
+## Chart Visualization
+
+The chart displays your total recurring costs with a beautiful animated visualization.
+
+### What the Chart Shows
+
+- **Total Amount**: Your combined subscription costs in the selected view mode
+- **Currency Symbol**: Displayed using your default currency
+- **View Mode**: Either Monthly or Yearly totals
+
+### How Totals Are Calculated
+
+Recur automatically converts subscription costs based on your selected view:
+
+- **Monthly View**: Yearly subscriptions are divided by 12
+- **Yearly View**: Monthly subscriptions are multiplied by 12
+
+For example, if you have:
+- Netflix: $15.99/month
+- Adobe Creative Cloud: $599.88/year
+
+**Monthly View** shows: $15.99 + ($599.88 ÷ 12) = $65.99/month
+
+**Yearly View** shows: ($15.99 × 12) + $599.88 = $791.76/year
+
+## Switching View Modes
+
+Toggle between monthly and yearly expense views.
+
+<Steps>
+  <Step title="Locate the view toggle">
+    Find the **Monthly** / **Yearly** segmented control below the greeting.
+  </Step>
+  
+  <Step title="Select your preferred view">
+    Tap either **Monthly** or **Yearly** to switch the view mode.
+  </Step>
+  
+  <Step title="View updated totals">
+    The chart and all subscription cards update to reflect the selected frequency.
+  </Step>
+</Steps>
+
+<Note>
+  Your view mode preference affects only the display—it doesn't change the actual billing frequency of your subscriptions.
+</Note>
+
+## Filtering Subscriptions
+
+Filter your Dashboard to show specific lists or unassigned subscriptions.
+
+<Steps>
+  <Step title="Open the filter dialog">
+    Tap the **List: All** chip below the chart (it shows your current filter).
+  </Step>
+  
+  <Step title="Select a filter option">
+    Choose from:
+    - **All**: Show all subscriptions (default)
+    - **Unassigned**: Show only subscriptions without a list
+    - **Your Lists**: Any custom lists you've created
+  </Step>
+  
+  <Step title="View filtered results">
+    The Dashboard updates to show only subscriptions matching your filter.
+  </Step>
+</Steps>
+
+### Filter Behavior
+
+- **Chart Updates**: The total cost reflects only the filtered subscriptions
+- **Drag-and-Drop**: Reordering is disabled when filtering by a specific list (only available in "All" view)
+- **Empty State**: If no subscriptions match your filter, a helpful message appears
+
+## Subscription Cards
+
+Each subscription appears as a card showing:
+
+- **Icon/Avatar**: Emoji or initials
+- **Service Name**: The subscription name
+- **Cost**: Amount in your currency, adjusted for the current view mode
+- **Frequency**: Original billing cycle (monthly/yearly)
+
+Tap any card to edit the subscription details.
+
+## Personalized Greeting
+
+The Dashboard greets you based on the time of day:
+
+- **Morning** (before 12 PM): "Good morning"
+- **Afternoon** (12 PM - 5 PM): "Good afternoon"
+- **Evening** (after 5 PM): "Good evening"
+
+Your name (set during onboarding) appears next to the greeting with a wave emoji.
+
+## Empty State
+
+When you first use Recur or have no subscriptions:
+
+- A message prompts you to add your first subscription
+- The total shows $0.00
+- The chart displays an empty state
+
+Simply tap the + button to get started!
+
+## Refreshing Data
+
+The Dashboard automatically refreshes when:
+
+- You return to the app from Settings
+- You add, edit, or delete a subscription
+- You create or delete a list
+
+No manual refresh is needed—your data is always up to date.

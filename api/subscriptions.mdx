@@ -1,0 +1,216 @@
+---
+title: Subscriptions API
+description: API functions for managing subscriptions in Recur
+---
+
+## createSubscription
+
+Creates a new subscription with a generated UUID.
+
+```typescript
+import { createSubscription } from '@/actions/subscription';
+
+const subscription = createSubscription({
+  name: 'Netflix',
+  icon: '📺',
+  listId: 'list-uuid',
+  frequency: 'monthly',
+  amount: 15.99,
+  currency: 'USD',
+  startDate: new Date('2024-01-01'),
+});
+```
+
+<ParamField path="name" type="string" required>
+  The name of the subscription. Must be a non-empty string after trimming.
+</ParamField>
+
+<ParamField path="icon" type="string | null" required>
+  An emoji icon for the subscription, or null to use initials fallback.
+</ParamField>
+
+<ParamField path="listId" type="string | null" optional>
+  The ID of the list this subscription belongs to. Must be a non-empty string if provided, or null.
+</ParamField>
+
+<ParamField path="frequency" type="'monthly' | 'yearly'" required>
+  The billing frequency of the subscription.
+</ParamField>
+
+<ParamField path="amount" type="number" required>
+  The subscription amount. Must be a non-negative number.
+</ParamField>
+
+<ParamField path="currency" type="Currency" required>
+  The currency code for the subscription amount (e.g., 'USD', 'EUR').
+</ParamField>
+
+<ParamField path="startDate" type="Date | string" required>
+  The start date of the subscription. Will be coerced to a Date object.
+</ParamField>
+
+<ResponseField name="subscription" type="Subscription">
+  Returns the created subscription object with a generated `id` field.
+</ResponseField>
+
+### Validation
+
+The function validates input using the `Zod_CreateSubscriptionSchema` (which is `Zod_Subscription` with `id` omitted). If validation fails:
+- Logs an error with the validation details
+- Throws an `Error` with message "Invalid input"
+
+### Storage
+
+The subscription is automatically persisted to MMKV storage under the key `'subscriptions'`.
+
+---
+
+## updateSubscription
+
+Updates an existing subscription by ID.
+
+```typescript
+import { updateSubscription } from '@/actions/subscription';
+
+const updated = updateSubscription({
+  subscription: {
+    id: 'existing-uuid',
+    name: 'Netflix Premium',
+    icon: '📺',
+    listId: 'list-uuid',
+    frequency: 'monthly',
+    amount: 19.99,
+    currency: 'USD',
+    startDate: new Date('2024-01-01'),
+  },
+});
+
+if (!updated) {
+  console.log('Subscription not found');
+}
+```
+
+<ParamField path="subscription" type="Subscription" required>
+  The complete subscription object including the `id` field. All fields must be valid according to the Subscription schema.
+</ParamField>
+
+<ResponseField name="result" type="Subscription | null">
+  Returns the updated subscription object if found, or `null` if the subscription with the given ID does not exist.
+</ResponseField>
+
+### Validation
+
+The function validates the entire subscription using `Zod_Subscription`. If validation fails:
+- Logs an error with the validation details
+- Throws an `Error` with message "Invalid input"
+
+### Behavior
+
+- If the subscription ID is not found, logs a warning and returns `null`
+- If found, replaces the subscription in the array and persists to storage
+
+---
+
+## removeSubscription
+
+Removes a subscription by ID.
+
+```typescript
+import { removeSubscription } from '@/actions/subscription';
+
+const removed = removeSubscription({
+  subscription: existingSubscription,
+});
+
+if (removed) {
+  console.log('Subscription removed:', removed.name);
+}
+```
+
+<ParamField path="subscription" type="Subscription" required>
+  The subscription object to remove. Must be a valid Subscription with an `id` field.
+</ParamField>
+
+<ResponseField name="result" type="Subscription | null">
+  Returns the removed subscription object if found and removed, or `null` if the subscription was not found.
+</ResponseField>
+
+### Validation
+
+The function validates the subscription using `Zod_Subscription`. If validation fails:
+- Logs an error with the validation details
+- Throws an `Error` with message "Invalid input"
+
+### Behavior
+
+- If the subscription ID is not found, logs a warning and returns `null`
+- If found, removes it from the array and persists the updated array to storage
+
+---
+
+## getSubscriptions
+
+Retrieves all subscriptions from storage.
+
+```typescript
+import { getSubscriptions } from '@/actions/subscription';
+
+const subscriptions = getSubscriptions();
+console.log(`Total subscriptions: ${subscriptions.length}`);
+```
+
+<ResponseField name="subscriptions" type="Subscription[]">
+  Returns an array of all valid subscriptions. Invalid subscriptions are filtered out and logged.
+</ResponseField>
+
+### Normalization
+
+The function automatically normalizes stored data:
+1. If the stored value is not an array, returns an empty array
+2. Attempts to parse the entire array with `Zod_SubscriptionArray`
+3. If array validation fails, validates each item individually:
+   - Valid items are included in the result
+   - Invalid items are dropped and a warning is logged with the count
+4. If any invalid items were dropped, the cleaned array is saved back to storage
+
+This ensures data integrity even if corrupted data exists in storage.
+
+---
+
+## saveSubscriptions
+
+Replaces all subscriptions in storage with the provided array.
+
+```typescript
+import { saveSubscriptions } from '@/actions/subscription';
+
+const newSubscriptions = [
+  {
+    id: 'uuid-1',
+    name: 'Netflix',
+    icon: '📺',
+    listId: null,
+    frequency: 'monthly',
+    amount: 15.99,
+    currency: 'USD',
+    startDate: new Date(),
+  },
+  // ... more subscriptions
+];
+
+saveSubscriptions(newSubscriptions);
+```
+
+<ParamField path="subscriptions" type="Subscription[]" required>
+  An array of valid subscription objects. Each subscription must conform to the Subscription schema.
+</ParamField>
+
+### Validation
+
+The function validates the entire array using `Zod_SubscriptionArray`. If validation fails:
+- Logs an error with the validation details
+- Throws an `Error` with message "Invalid subscriptions"
+
+### Warning
+
+This function completely replaces all subscriptions in storage. Use with caution as it will overwrite existing data.

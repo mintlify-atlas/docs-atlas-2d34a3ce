@@ -1,0 +1,155 @@
+---
+title: User API
+description: API functions for managing user settings and onboarding state in Recur
+---
+
+## setUserName
+
+Sets the user's name in storage.
+
+```typescript
+import { setUserName } from '@/actions/user';
+
+const name = setUserName('John Doe');
+console.log('User name set to:', name); // 'John Doe'
+```
+
+<ParamField path="name" type="string" required>
+  The user's name. Must be a string between 1 and 100 characters.
+</ParamField>
+
+<ResponseField name="name" type="string">
+  Returns the validated user name that was set.
+</ResponseField>
+
+### Validation
+
+The function validates input using `Zod_UserNameSchema`:
+```typescript
+z.string().min(1).max(100)
+```
+
+If validation fails:
+- Logs an error with the validation details
+- Throws an `Error` with message "Invalid name"
+
+### Storage
+
+The user name is persisted to MMKV storage under the key `'user_name'`.
+
+---
+
+## getUserName
+
+Retrieves the user's name from storage.
+
+```typescript
+import { getUserName } from '@/actions/user';
+
+const name = getUserName();
+if (name) {
+  console.log('Welcome back,', name);
+} else {
+  console.log('No user name set');
+}
+```
+
+<ResponseField name="name" type="string | null">
+  Returns the stored user name if valid, or `null` if:
+  - No user name has been set
+  - The stored name is invalid/corrupted
+</ResponseField>
+
+### Validation
+
+The function validates the stored value using `Zod_UserNameSchema`. If validation fails:
+- Logs an error with the validation details
+- Returns `null` instead of throwing an error
+
+This graceful error handling ensures the app can function even if stored data is corrupted.
+
+### Source Reference
+
+See implementation in `/home/daytona/workspace/source/actions/user.ts:25-40`
+
+---
+
+## Onboarding Functions
+
+The user module also includes functions for managing onboarding state and listening to changes.
+
+### setOnboardingComplete
+
+Marks the onboarding process as complete and notifies all listeners.
+
+```typescript
+import { setOnboardingComplete } from '@/actions/user';
+
+setOnboardingComplete();
+```
+
+This function:
+1. Sets the `'onboarding_complete'` key to `true` in MMKV storage
+2. Notifies all registered listeners by calling them with `true`
+
+### isOnboardingComplete
+
+Checks if the onboarding process has been completed.
+
+```typescript
+import { isOnboardingComplete } from '@/actions/user';
+
+if (isOnboardingComplete()) {
+  console.log('User has completed onboarding');
+} else {
+  console.log('Show onboarding flow');
+}
+```
+
+<ResponseField name="isComplete" type="boolean">
+  Returns `true` if onboarding is complete, `false` otherwise.
+</ResponseField>
+
+### subscribeToOnboarding
+
+Subscribes to onboarding state changes.
+
+```typescript
+import { subscribeToOnboarding } from '@/actions/user';
+
+const unsubscribe = subscribeToOnboarding((isComplete) => {
+  console.log('Onboarding complete:', isComplete);
+});
+
+// Later, when you want to stop listening:
+unsubscribe();
+```
+
+<ParamField path="listener" type="(isComplete: boolean) => void" required>
+  A callback function that will be called whenever the onboarding state changes.
+  The callback receives a boolean indicating whether onboarding is complete.
+</ParamField>
+
+<ResponseField name="unsubscribe" type="() => void">
+  Returns an unsubscribe function. Call this function to remove the listener.
+</ResponseField>
+
+### Implementation Details
+
+The onboarding subscription system uses a `Set` to manage listeners:
+
+```typescript
+type OnboardingListener = (isComplete: boolean) => void;
+const onboardingListeners = new Set<OnboardingListener>();
+```
+
+When `setOnboardingComplete()` is called, all listeners in the set are invoked:
+```typescript
+onboardingListeners.forEach((listener) => listener(true));
+```
+
+This pattern allows multiple components to react to onboarding completion without tight coupling.
+
+### Source Reference
+
+See implementation in `/home/daytona/workspace/source/actions/user.ts:42-62`

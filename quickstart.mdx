@@ -1,80 +1,268 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick start
+description: Get Recur running on your device in under 5 minutes
 ---
 
-## Get started in three steps
+Follow these steps to clone, install, and run Recur locally on your development machine.
 
-Get your documentation site running locally and make your first customization.
+## Prerequisites
 
-### Step 1: Set up your local environment
+Before you begin, ensure you have the following installed:
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
+<CardGroup cols={2}>
+  <Card title="Node.js" icon="node-js">
+    Version 18 or higher - [Download](https://nodejs.org/)
+  </Card>
+  
+  <Card title="Package Manager" icon="box">
+    Bun (recommended), npm, or yarn
+  </Card>
+  
+  <Card title="Expo CLI" icon="mobile">
+    For running the app - Installed automatically
+  </Card>
+  
+  <Card title="Development Environment" icon="code">
+    iOS Simulator (Mac only) or Android Emulator
+  </Card>
+</CardGroup>
+
+## Installation
+
+<Steps>
+  <Step title="Clone the repository">
+    Clone the Recur repository from GitHub:
     
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+    ```bash
+    git clone https://github.com/yeetfactory/recur.git
+    cd recur
+    ```
+  </Step>
 
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
+  <Step title="Install dependencies">
+    Install all required dependencies using your preferred package manager:
     
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
+    <CodeGroup>
+    ```bash bun
+    bun install
+    ```
+    
+    ```bash npm
+    npm install
+    ```
+    
+    ```bash yarn
+    yarn install
+    ```
+    </CodeGroup>
+    
+    <Note>
+      Bun is recommended for faster installation and better performance.
+    </Note>
+  </Step>
+
+  <Step title="Start the development server">
+    Start the Expo development server with cache cleared:
+    
+    <CodeGroup>
+    ```bash bun
+    bun dev
+    ```
+    
+    ```bash npm
+    npm run dev
+    ```
+    
+    ```bash yarn
+    yarn dev
+    ```
+    </CodeGroup>
+    
+    This runs `expo start -c` which starts the Metro bundler with a fresh cache.
+  </Step>
+
+  <Step title="Run the app">
+    Choose your platform to run the app:
+    
+    <Tabs>
+      <Tab title="iOS Simulator">
+        Press `i` in the terminal to launch on iOS Simulator (Mac only):
+        
+        ```bash
+        # Or run directly
+        bun ios
+        ```
+        
+        <Note>
+          Requires Xcode and iOS Simulator to be installed on macOS.
+        </Note>
+      </Tab>
+      
+      <Tab title="Android Emulator">
+        Press `a` in the terminal to launch on Android Emulator:
+        
+        ```bash
+        # Or run directly
+        bun android
+        ```
+        
+        <Note>
+          Requires Android Studio and an Android Virtual Device (AVD) to be configured.
+        </Note>
+      </Tab>
+      
+      <Tab title="Web Browser">
+        Press `w` in the terminal to launch in your web browser:
+        
+        ```bash
+        # Or run directly
+        bun web
+        ```
+        
+        <Tip>
+          Web mode is great for quick testing, but some features may behave differently than on native platforms.
+        </Tip>
+      </Tab>
+      
+      <Tab title="Physical Device">
+        1. Install [Expo Go](https://expo.dev/go) on your iOS or Android device
+        2. Scan the QR code shown in the terminal
+        3. The app will load on your device
+        
+        <Warning>
+          Ensure your device is on the same Wi-Fi network as your development machine.
+        </Warning>
+      </Tab>
+    </Tabs>
+  </Step>
+</Steps>
+
+## Available scripts
+
+Recur includes several npm scripts for different development tasks:
+
+| Command | Description |
+| --- | --- |
+| `bun dev` | Start Expo development server with cleared cache |
+| `bun ios` | Build and run on iOS Simulator |
+| `bun android` | Build and run on Android Emulator |
+| `bun web` | Start web development server |
+| `bun clean` | Remove `.expo` and `node_modules` directories |
+
+## First-time setup
+
+When you first launch Recur, you'll go through a quick onboarding process:
+
+<Steps>
+  <Step title="Welcome screen">
+    Review the welcome message and app introduction.
+  </Step>
+
+  <Step title="Enter your name">
+    Provide your name for personalized greetings on the dashboard.
+  </Step>
+
+  <Step title="Select your currency">
+    Choose your default currency from 100+ supported currencies.
+    
+    <Warning>
+      **Currency lock**: Your currency selection is permanent and cannot be changed later. This ensures data consistency across all subscriptions.
+    </Warning>
+  </Step>
+
+  <Step title="Accept terms">
+    Review and accept the terms of service and privacy policy.
+  </Step>
+</Steps>
+
+After onboarding, you'll land on the dashboard where you can start adding subscriptions!
+
+## Project structure
+
+Recur uses Expo Router for file-based navigation. Here's the key structure:
+
+```
+recur/
+├── app/                    # Expo Router pages
+│   ├── (tabs)/            # Tab-based navigation
+│   │   ├── index.tsx      # Dashboard screen
+│   │   └── settings/      # Settings screens
+│   └── onboarding/        # Onboarding flow
+├── actions/               # Business logic & data operations
+├── components/            # Reusable UI components
+├── hooks/                 # Custom React hooks
+├── integrations/          # MMKV storage setup
+├── lib/                   # Utility functions
+├── types.ts               # TypeScript types
+└── const.ts               # Constants & currency data
+```
+
+## Troubleshooting
+
+<Accordion title="Metro bundler not starting">
+  If the Metro bundler fails to start, try clearing the cache:
+  
+  ```bash
+  bun clean
+  bun install
+  bun dev
+  ```
 </Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
+<Accordion title="iOS Simulator not opening">
+  Ensure Xcode is installed and the iOS Simulator is configured:
+  
+  ```bash
+  xcode-select --install
+  ```
 </Accordion>
+
+<Accordion title="Android Emulator not found">
+  Make sure you have Android Studio installed and at least one AVD configured. Check available devices:
+  
+  ```bash
+  emulator -list-avds
+  ```
+</Accordion>
+
+<Accordion title="Network error on physical device">
+  Ensure your phone and computer are on the same Wi-Fi network. If issues persist, try:
+  
+  ```bash
+  expo start --tunnel
+  ```
+</Accordion>
+
+## Development tips
+
+<Tip>
+  **Fast Refresh**: React Native Fast Refresh automatically updates your app when you save files. You don't need to rebuild the app for most changes.
+</Tip>
+
+<Tip>
+  **Console logging**: Use `console.log()` to debug. Logs appear in the terminal where you ran `bun dev`.
+</Tip>
+
+<Tip>
+  **Reload the app**: Shake your device (or press `Cmd+D` on iOS Simulator / `Cmd+M` on Android Emulator) to open the developer menu and reload the app.
+</Tip>
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
-
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Architecture" icon="sitemap" href="/concepts/architecture">
+    Learn about Recur's tech stack and architecture
+  </Card>
+  
+  <Card title="Project Structure" icon="folder-tree" href="/development/project-structure">
+    Explore the codebase organization
+  </Card>
+  
+  <Card title="Data Models" icon="database" href="/concepts/data-models">
+    Understand the data structures
+  </Card>
+  
+  <Card title="API Reference" icon="code" href="/api/subscriptions">
+    Browse the API documentation
+  </Card>
 </CardGroup>
-
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>

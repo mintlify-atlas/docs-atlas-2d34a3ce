@@ -1,0 +1,245 @@
+---
+title: Project Structure
+description: Understanding the Recur codebase organization and file-based routing
+---
+
+Recur follows a modular, feature-based structure built on Expo Router's file-based routing system. This guide explains the directory organization and routing conventions.
+
+## Directory Overview
+
+```
+recur/
+├── app/                    # Expo Router pages (file-based routing)
+├── actions/                # Business logic & data operations
+├── components/             # Reusable UI components
+├── hooks/                  # Custom React hooks
+├── clients/                # External service clients
+├── integrations/           # Third-party integrations
+├── lib/                    # Utility functions
+├── const/                  # App constants & currency data
+├── assets/                 # Images, fonts, and static files
+├── types.ts                # TypeScript type definitions
+└── package.json            # Dependencies and scripts
+```
+
+## Core Directories
+
+### `app/` - File-Based Routing
+
+Recur uses **[Expo Router](https://expo.dev/router)** for navigation. Routes are automatically generated based on the file structure:
+
+```
+app/
+├── _layout.tsx             # Root layout (fonts, providers)
+├── +html.tsx               # Web HTML wrapper
+├── +not-found.tsx          # 404 page
+├── (tabs)/                 # Tab navigation group
+│   ├── _layout.tsx         # Tab bar configuration
+│   ├── index.tsx           # Home/Dashboard (route: /)
+│   └── settings/           # Settings screens
+│       ├── index.tsx       # Main settings (route: /settings)
+│       ├── manage-lists.tsx # Manage lists (route: /settings/manage-lists)
+│       ├── privacy.tsx     # Privacy policy (route: /settings/privacy)
+│       └── terms.tsx       # Terms of service (route: /settings/terms)
+└── onboarding/             # Onboarding flow
+    ├── index.tsx           # Welcome screen (route: /onboarding)
+    ├── details.tsx         # Name & currency setup (route: /onboarding/details)
+    └── terms.tsx           # Terms acceptance (route: /onboarding/terms)
+```
+
+#### Routing Conventions
+
+| File/Folder | Route | Purpose |
+|------------|-------|----------|
+| `index.tsx` | `/` | Default route for a directory |
+| `_layout.tsx` | N/A | Layout wrapper (not a route) |
+| `(tabs)/` | N/A | Route group (parentheses hide from URL) |
+| `settings/index.tsx` | `/settings` | Settings home screen |
+| `+not-found.tsx` | Catch-all | 404 error page |
+
+<Note>
+  Files starting with `_` or wrapped in `()` don't create routes. They're used for layouts and organization.
+</Note>
+
+### `actions/` - Business Logic
+
+Data operations and state management are separated from UI components:
+
+```
+actions/
+├── subscription.ts         # CRUD operations for subscriptions
+├── list.ts                 # CRUD operations for lists
+├── currency.ts             # Currency management utilities
+└── user.ts                 # User preferences (name, currency, theme)
+```
+
+Actions handle all interactions with MMKV storage and include Zod validation for data integrity.
+
+**Example**: `subscription.ts` exports:
+- `getSubscriptions()` - Fetch all subscriptions
+- `addSubscription()` - Create new subscription
+- `updateSubscription()` - Edit existing subscription
+- `deleteSubscription()` - Remove subscription
+- `reorderSubscriptions()` - Update drag-and-drop order
+
+### `components/` - UI Components
+
+```
+components/
+├── ui/                              # Base UI primitives (buttons, dialogs, etc.)
+├── add-subscriptions-dialog.tsx     # Modal for creating subscriptions
+├── edit-subscription-dialog.tsx     # Modal for editing subscriptions
+├── subscription-avatar.tsx          # Avatar with emoji or initials
+├── emoji-picker.tsx                 # Emoji selection component
+└── policy-screen.tsx                # Reusable policy viewer
+```
+
+Components are split into:
+- **`ui/`** - Low-level, reusable primitives (built with rn-primitives)
+- **Feature components** - Domain-specific UI (dialogs, cards, etc.)
+
+### `hooks/` - Custom React Hooks
+
+```
+hooks/
+└── use-lists.ts            # State management for lists
+```
+
+Custom hooks encapsulate stateful logic and side effects. For example, `use-lists.ts` provides:
+- `useLists()` - Returns all lists with real-time updates
+- `useListSubscriptions(listId)` - Filters subscriptions by list
+
+### `integrations/` - Third-Party Services
+
+```
+integrations/
+└── mmkv.ts                 # MMKV local storage client
+```
+
+Integration files configure and export instances of third-party libraries. `mmkv.ts` sets up the storage instance used throughout the app.
+
+### `lib/` - Utility Functions
+
+Helper functions and utilities that don't fit into other categories (date formatting, calculations, etc.).
+
+### `const/` - Constants
+
+App-wide constants including:
+- Currency codes and symbols
+- Default values
+- Configuration settings
+
+## File-Based Routing in Detail
+
+### Navigation Groups
+
+The `(tabs)` folder is a **route group**. It creates a tab navigation layout without adding `/tabs` to the URL:
+
+```tsx
+// app/(tabs)/_layout.tsx
+export default function TabLayout() {
+  return (
+    <Tabs>
+      <Tabs.Screen name="index" options={{ title: "Dashboard" }} />
+      <Tabs.Screen name="settings" options={{ title: "Settings" }} />
+    </Tabs>
+  );
+}
+```
+
+### Nested Routes
+
+Nested folders create nested routes automatically:
+
+```
+app/
+└── settings/
+    ├── index.tsx           # /settings
+    └── manage-lists.tsx    # /settings/manage-lists
+```
+
+Navigation between routes uses the `expo-router` API:
+
+```tsx
+import { router } from 'expo-router';
+
+// Navigate to a route
+router.push('/settings/manage-lists');
+
+// Go back
+router.back();
+```
+
+## Data Flow Architecture
+
+```
+┌─────────────┐
+│   Screen    │  (app/)
+│  Component  │
+└──────┬──────┘
+       │
+       ├─ Reads from hooks (hooks/)
+       │
+       └─ Calls actions (actions/)
+              │
+              └─ Interacts with MMKV (integrations/mmkv.ts)
+```
+
+1. **Screens** (`app/`) render UI and handle user interactions
+2. **Hooks** (`hooks/`) manage component state and subscriptions
+3. **Actions** (`actions/`) perform data operations and validation
+4. **Integrations** (`integrations/`) persist data to MMKV storage
+
+## TypeScript Types
+
+All types are centralized in `types.ts` at the root:
+
+```typescript
+// types.ts
+export interface Subscription {
+  id: string;
+  name: string;
+  icon: string | null;
+  listId: string | null;
+  frequency: 'monthly' | 'yearly';
+  amount: number;
+  currency: Currency;
+  startDate: Date;
+}
+
+export interface List {
+  id: string;
+  name: string;
+}
+```
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Separation of Concerns" icon="layer-group">
+    Keep UI in `components/`, logic in `actions/`, and state in `hooks/`
+  </Card>
+  
+  <Card title="File-Based Routing" icon="route">
+    Use folders and `index.tsx` files to create clean URL structures
+  </Card>
+  
+  <Card title="Type Safety" icon="shield-check">
+    Import types from `types.ts` and use Zod for runtime validation
+  </Card>
+  
+  <Card title="Modular Components" icon="puzzle-piece">
+    Build small, reusable components in `components/ui/`
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Architecture Overview" icon="sitemap" href="/concepts/architecture">
+    Learn about the technical architecture and tech stack
+  </Card>
+  <Card title="Data Models" icon="database" href="/concepts/data-models">
+    Explore the data structures and validation
+  </Card>
+</CardGroup>

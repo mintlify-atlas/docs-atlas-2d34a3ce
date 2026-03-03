@@ -1,0 +1,331 @@
+---
+title: Deployment
+description: Deploy Recur to iOS and Android using Expo Application Services (EAS)
+---
+
+Recur uses [Expo Application Services (EAS)](https://expo.dev/eas) to build, update, and submit the app to app stores. EAS provides a complete deployment workflow for Expo apps.
+
+## Prerequisites
+
+Before deploying, ensure you have:
+
+- An [Expo account](https://expo.dev/signup) (free tier available)
+- [EAS CLI](https://docs.expo.dev/build/setup/) installed globally
+- iOS Developer account (for iOS deployment)
+- Google Play Developer account (for Android deployment)
+
+<Steps>
+  <Step title="Install EAS CLI">
+    Install the EAS CLI globally:
+    
+    <CodeGroup>
+    ```bash npm
+    npm install -g eas-cli
+    ```
+    
+    ```bash yarn
+    yarn global add eas-cli
+    ```
+    
+    ```bash bun
+    bun add -g eas-cli
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Login to your Expo account">
+    Authenticate with your Expo account:
+    
+    ```bash
+    eas login
+    ```
+  </Step>
+
+  <Step title="Configure EAS for your project">
+    Initialize EAS in your project (if not already configured):
+    
+    ```bash
+    eas build:configure
+    ```
+    
+    This creates an `eas.json` file with build profiles.
+  </Step>
+</Steps>
+
+## EAS Build
+
+[EAS Build](https://docs.expo.dev/build/introduction/) compiles your app into native binaries for iOS and Android.
+
+### Build for iOS
+
+Create a production build for iOS:
+
+```bash
+eas build --platform ios --profile production
+```
+
+<Tip>
+  For development builds that can be installed on simulators or physical devices:
+  
+  ```bash
+  eas build --platform ios --profile development
+  ```
+</Tip>
+
+### Build for Android
+
+Create a production build for Android:
+
+```bash
+eas build --platform android --profile production
+```
+
+For an APK instead of AAB:
+
+```bash
+eas build --platform android --profile preview
+```
+
+### Build for both platforms
+
+Build for iOS and Android simultaneously:
+
+```bash
+eas build --platform all --profile production
+```
+
+<Note>
+  Builds run on EAS servers, so you don't need macOS to build for iOS. The build process typically takes 10-20 minutes.
+</Note>
+
+## EAS Update
+
+[EAS Update](https://docs.expo.dev/eas-update/introduction/) allows you to push over-the-air (OTA) updates to your app without going through app store review.
+
+<Warning>
+  OTA updates can only update JavaScript code and assets. Native code changes (like adding new native modules) require a new build.
+</Warning>
+
+### Configure EAS Update
+
+EAS Update is already configured in `app.json`:
+
+```json
+"updates": {
+  "url": "https://u.expo.dev/YOUR_PROJECT_ID"
+}
+```
+
+### Publish an update
+
+Publish an update to the production branch:
+
+```bash
+eas update --branch production --message "Fix subscription calculation bug"
+```
+
+For preview/staging:
+
+```bash
+eas update --branch preview --message "Test new feature"
+```
+
+### View update history
+
+See all published updates:
+
+```bash
+eas update:view
+```
+
+<Tip>
+  Users will automatically download and apply updates the next time they open the app (or in the background if configured).
+</Tip>
+
+## EAS Submit
+
+[EAS Submit](https://docs.expo.dev/submit/introduction/) uploads your app to the Apple App Store and Google Play Store.
+
+### Submit to App Store (iOS)
+
+<Steps>
+  <Step title="Build for production">
+    First, create a production build:
+    
+    ```bash
+    eas build --platform ios --profile production
+    ```
+  </Step>
+
+  <Step title="Submit to App Store">
+    Submit the build to App Store Connect:
+    
+    ```bash
+    eas submit --platform ios
+    ```
+    
+    EAS will guide you through the process, including uploading to App Store Connect.
+  </Step>
+
+  <Step title="Complete App Store review">
+    Log in to [App Store Connect](https://appstoreconnect.apple.com/) to complete the submission:
+    - Add app metadata (description, screenshots, keywords)
+    - Set pricing and availability
+    - Submit for review
+  </Step>
+</Steps>
+
+### Submit to Google Play (Android)
+
+<Steps>
+  <Step title="Build for production">
+    Create a production build:
+    
+    ```bash
+    eas build --platform android --profile production
+    ```
+  </Step>
+
+  <Step title="Submit to Google Play">
+    Submit the build to Google Play Console:
+    
+    ```bash
+    eas submit --platform android
+    ```
+  </Step>
+
+  <Step title="Complete Google Play review">
+    Log in to [Google Play Console](https://play.google.com/console/) to complete the submission:
+    - Add app metadata (description, screenshots, category)
+    - Set pricing and distribution
+    - Submit for review
+  </Step>
+</Steps>
+
+## Build profiles
+
+EAS uses build profiles defined in `eas.json`. Here's a typical configuration:
+
+```json
+{
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "distribution": "store"
+    }
+  }
+}
+```
+
+### Profile purposes
+
+- **development**: For testing with Expo Dev Client on physical devices
+- **preview**: For internal testing (APK for Android, TestFlight for iOS)
+- **production**: For app store submissions
+
+## Environment variables
+
+Store secrets and environment-specific configuration using EAS Secrets:
+
+```bash
+eas secret:create --name API_KEY --value your-api-key
+```
+
+Access them in your app:
+
+```typescript
+import Constants from 'expo-constants';
+
+const apiKey = Constants.expoConfig?.extra?.API_KEY;
+```
+
+<Warning>
+  Never commit secrets to your repository. Always use EAS Secrets or environment variables for sensitive data.
+</Warning>
+
+## App versioning
+
+Update app version in `app.json` before each release:
+
+```json
+{
+  "expo": {
+    "version": "1.0.1",
+    "ios": {
+      "buildNumber": "2"
+    },
+    "android": {
+      "versionCode": 2
+    }
+  }
+}
+```
+
+- **version**: User-facing version (e.g., "1.0.1")
+- **buildNumber** (iOS): Incremental build number
+- **versionCode** (Android): Incremental version code
+
+<Tip>
+  Increment `buildNumber` and `versionCode` with every build, even if the user-facing version stays the same.
+</Tip>
+
+## Monitoring
+
+Monitor your app's performance and crashes:
+
+- **Expo Dashboard**: View builds, updates, and analytics at [expo.dev](https://expo.dev)
+- **App Store Connect**: iOS analytics and crash reports
+- **Google Play Console**: Android analytics and crash reports
+
+## CI/CD integration
+
+Automate builds with GitHub Actions or other CI/CD platforms:
+
+```yaml
+name: EAS Build
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm install -g eas-cli
+      - run: eas build --platform all --profile production --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+```
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="EAS Build docs" icon="hammer" href="https://docs.expo.dev/build/introduction/">
+    Learn more about EAS Build configuration
+  </Card>
+  
+  <Card title="EAS Update docs" icon="arrow-up" href="https://docs.expo.dev/eas-update/introduction/">
+    Explore OTA update strategies
+  </Card>
+  
+  <Card title="EAS Submit docs" icon="paper-plane" href="https://docs.expo.dev/submit/introduction/">
+    Master app store submission
+  </Card>
+  
+  <Card title="App Store guidelines" icon="apple" href="https://developer.apple.com/app-store/review/guidelines/">
+    Review Apple's App Store guidelines
+  </Card>
+</CardGroup>

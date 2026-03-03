@@ -1,0 +1,200 @@
+---
+title: Architecture
+description: Technical stack, dependencies, and overall architecture of Recur
+---
+
+## Overview
+
+Recur is a native mobile subscription tracking app built with modern React Native technologies, emphasizing performance, type safety, and an exceptional user experience.
+
+## Tech Stack
+
+### Core Framework
+
+<ParamField path="Expo" type="^54.0.0">
+  Universal React Native framework providing native APIs, routing, and development tools
+</ParamField>
+
+<ParamField path="React" type="19.1.0">
+  UI library with latest concurrent features and hooks
+</ParamField>
+
+<ParamField path="React Native" type="0.81.5">
+  Cross-platform mobile framework for iOS and Android
+</ParamField>
+
+<ParamField path="Expo Router" type="~6.0.10">
+  File-based routing system built on React Navigation
+</ParamField>
+
+### Styling & UI
+
+<ParamField path="NativeWind" type="^4.2.1">
+  Tailwind CSS for React Native, enabling utility-first styling
+</ParamField>
+
+<ParamField path="Tailwind CSS" type="^3.4.14">
+  Utility-first CSS framework
+</ParamField>
+
+<ParamField path="class-variance-authority" type="^0.7.1">
+  Component variant management for consistent UI patterns
+</ParamField>
+
+<ParamField path="Lucide React Native" type="^0.545.0">
+  Beautiful, consistent icon system
+</ParamField>
+
+### Animation & Interactions
+
+<ParamField path="React Native Reanimated" type="~4.1.1">
+  High-performance animations running on the native thread
+</ParamField>
+
+<ParamField path="React Native Gesture Handler" type="^2.29.1">
+  Native-driven gesture handling for smooth interactions
+</ParamField>
+
+<ParamField path="React Native Draggable FlatList" type="^4.0.3">
+  Smooth drag-and-drop list reordering with native animations
+</ParamField>
+
+### Data & Storage
+
+<ParamField path="React Native MMKV" type="^4.0.1">
+  Ultra-fast key-value storage, up to 30x faster than AsyncStorage
+</ParamField>
+
+<ParamField path="Zod" type="^4.1.13">
+  TypeScript-first schema validation for runtime type safety
+</ParamField>
+
+### UI Primitives
+
+<ParamField path="@rn-primitives/alert-dialog" type="^1.2.0">
+  Accessible alert dialog primitives
+</ParamField>
+
+<ParamField path="@rn-primitives/dialog" type="^1.2.0">
+  Modal dialog components
+</ParamField>
+
+<ParamField path="@rn-primitives/portal" type="~1.3.0">
+  Portal rendering for overlays and modals
+</ParamField>
+
+<ParamField path="@react-native-community/datetimepicker" type="^8.6.0">
+  Native date and time picker components
+</ParamField>
+
+## Architecture Patterns
+
+### File-Based Routing
+
+Recur uses Expo Router's file-based routing system:
+
+```tsx
+app/
+├── _layout.tsx          // Root layout with theme & navigation
+├── (tabs)/              // Tab-based navigation group
+│   ├── index.tsx        // Home screen
+│   └── settings/        // Settings stack
+└── onboarding/          // Onboarding flow
+```
+
+### State Management
+
+Recur uses a lightweight, action-based pattern with MMKV storage:
+
+```typescript
+// Action modules in /actions
+- subscription.ts   // CRUD operations for subscriptions
+- list.ts          // Manage subscription lists
+- currency.ts      // Currency preferences
+- user.ts          // User settings & onboarding state
+```
+
+See app/_layout.tsx:30 for the state management pattern using React's `useReducer`.
+
+### Data Validation
+
+All data is validated using Zod schemas before storage:
+
+```typescript
+// From types.ts
+export const Zod_Subscription = z.object({
+  id: z.string(),
+  name: z.string().trim().min(1),
+  icon: z.string().nullable(),
+  listId: Zod_List.shape.id.trim().min(1).nullable().optional(),
+  frequency: Zod_SubscriptionFrequency,
+  amount: z.number().nonnegative(),
+  currency: Zod_Currency,
+  startDate: z.coerce.date(),
+});
+```
+
+### Component Structure
+
+```
+components/
+├── ui/              // Reusable UI primitives
+├── subscription/    // Subscription-specific components
+└── layout/          // Layout components
+```
+
+### Client Services
+
+Utility clients for cross-cutting concerns:
+
+```typescript
+clients/
+├── mmkv.ts      // Storage client wrapper
+└── logger.ts    // Logging utility
+```
+
+## Type Safety
+
+Recur maintains strict type safety throughout:
+
+1. **Schema-first design**: All data models defined with Zod schemas
+2. **Type inference**: TypeScript types inferred from Zod schemas using `z.infer<>`
+3. **Runtime validation**: All external data validated at runtime
+4. **TypeScript strict mode**: Full type checking enabled
+
+## Performance Optimizations
+
+### MMKV Storage
+
+MMKV provides synchronous, ultra-fast storage:
+- **30x faster** than AsyncStorage
+- Encrypted and secure
+- Synchronous API for instant reads
+- Lazy loading and caching
+
+See clients/mmkv.ts:1 for the storage implementation.
+
+### Native Animations
+
+Reanimated 4 runs animations on the native thread:
+- 60 FPS animations without JS thread blocking
+- Gesture-driven interactions
+- Smooth drag-and-drop lists
+
+### Code Splitting
+
+Expo Router enables automatic code splitting per route, reducing initial bundle size.
+
+## Development Tools
+
+<ParamField path="TypeScript" type="~5.9.2">
+  Static type checking and inference
+</ParamField>
+
+<ParamField path="Prettier" type="^3.6.2">
+  Code formatting with Tailwind plugin
+</ParamField>
+
+<ParamField path="Bun" type="latest">
+  Fast JavaScript runtime for development tasks
+</ParamField>

@@ -1,0 +1,140 @@
+---
+title: Introduction
+description: A local-first subscription tracker built with React Native and Expo. Track recurring expenses with a focused, offline-friendly UI.
+---
+
+<img
+  src="https://github.com/user-attachments/assets/38102fca-9bb6-4aa4-8b66-c261682901cc"
+  alt="Recur Dashboard"
+/>
+
+## Welcome to Recur
+
+Recur is a **privacy-first subscription tracker** that keeps all your data on your device. No cloud sync, no accounts, no tracking—just a beautiful, local-first app for managing your recurring expenses.
+
+Built with React Native and Expo, Recur combines powerful features with a sleek, animated interface that respects your privacy.
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Local-First Storage" icon="database">
+    All data stored securely on-device using MMKV. Your subscription data never leaves your device.
+  </Card>
+  
+  <Card title="Multi-Currency Support" icon="dollar-sign">
+    Choose from 100+ currencies with proper symbols. Set once during onboarding for data consistency.
+  </Card>
+  
+  <Card title="Drag & Drop Reordering" icon="grip-vertical">
+    Organize subscriptions with intuitive drag-and-drop powered by React Native Reanimated.
+  </Card>
+  
+  <Card title="Custom List Organization" icon="list">
+    Create custom lists (Work, Entertainment, Personal) with an "Unassigned" view for unlisted items.
+  </Card>
+  
+  <Card title="Beautiful Dashboard" icon="chart-line">
+    Animated chart visualization showing monthly and yearly totals with time-of-day personalized greetings.
+  </Card>
+  
+  <Card title="Dark & Light Modes" icon="moon">
+    Seamless theme switching with custom Recoleta typography and smooth animations throughout.
+  </Card>
+</CardGroup>
+
+## Screenshots
+
+<Tabs>
+  <Tab title="Dark Mode">
+    <div style="display: flex; gap: 20px; justify-content: center;">
+      <img src="https://github.com/user-attachments/assets/38102fca-9bb6-4aa4-8b66-c261682901cc" width="45%" />
+      <img src="https://github.com/user-attachments/assets/130a511f-52ed-42f5-8ea8-55c3fc487d0b" width="45%" />
+    </div>
+  </Tab>
+  
+  <Tab title="Light Mode">
+    <div style="display: flex; gap: 20px; justify-content: center;">
+      <img src="https://github.com/user-attachments/assets/e2808675-eaef-4780-bc14-c9b96d23e0f1" width="45%" />
+      <img src="https://github.com/user-attachments/assets/2adc6b95-52ba-44a5-b7ad-71958e226415" width="45%" />
+    </div>
+  </Tab>
+</Tabs>
+
+## Tech Stack
+
+Recur is built with modern React Native technologies:
+
+| Technology | Purpose |
+| --- | --- |
+| **Expo** | React Native framework & tooling |
+| **Expo Router** | File-based routing |
+| **NativeWind** | Tailwind CSS for React Native |
+| **React Native Reanimated** | Smooth, performant animations |
+| **MMKV** | High-performance local storage |
+| **Zod** | Runtime type validation |
+| **Lucide Icons** | Beautiful icon set |
+| **Draggable FlatList** | Drag-and-drop reordering |
+
+<Note>
+  Recur uses **Zod** for runtime validation to ensure data integrity when reading from local storage.
+</Note>
+
+## Privacy & Data
+
+<CardGroup cols={2}>
+  <Card title="100% Local Storage" icon="shield-check">
+    All data stored on-device using MMKV—no server communication.
+  </Card>
+  
+  <Card title="No Analytics" icon="ban">
+    Zero tracking or telemetry. Your usage patterns stay private.
+  </Card>
+  
+  <Card title="No Cloud Sync" icon="cloud-slash">
+    Data stays on your device. No account creation required.
+  </Card>
+  
+  <Card title="Instant Access" icon="bolt">
+    Start using immediately—no sign-up, no verification.
+  </Card>
+</CardGroup>
+
+## Data Models
+
+Recur uses two primary data structures validated with Zod:
+
+### Subscription
+
+```typescript
+{
+  id: string;
+  name: string;
+  icon: string | null; // Emoji or null (falls back to initials)
+  listId: string | null; // Associated list
+  frequency: 'monthly' | 'yearly';
+  amount: number;
+  currency: Currency; // From CURRENCY_CODES
+  startDate: Date;
+}
+```
+
+### List
+
+```typescript
+{
+  id: string;
+  name: string;
+}
+```
+
+<Warning>
+  Lists are entirely optional. If a subscription's list is deleted, it becomes "Unassigned" and remains accessible via the Unassigned filter chip.
+</Warning>
+
+## Get Started
+
+Ready to track your subscriptions? Follow our quick start guide to clone, install, and run Recur locally.
+
+<Card title="Quick Start" icon="rocket" href="/quickstart">
+  Clone the repo and run Recur in under 5 minutes
+</Card>

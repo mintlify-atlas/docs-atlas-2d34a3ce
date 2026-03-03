@@ -1,0 +1,156 @@
+---
+title: Data Storage
+description: How Recur stores and persists your data locally on your device
+---
+
+All your subscription data in Recur is stored locally on your device using MMKV, a high-performance key-value storage system.
+
+## What Gets Stored
+
+Recur stores the following information locally on your device:
+
+### User Preferences
+- **Your name**: The personalized name you enter during onboarding
+- **Currency preference**: Your default currency (set once during setup)
+- **Theme selection**: Light or dark mode preference
+- **Onboarding status**: Whether you've completed the initial setup
+
+### Subscription Data
+- **Subscription details**: Name, amount, billing frequency, start date
+- **Icons**: Emoji or initials for each subscription
+- **Lists**: Custom organization groups (e.g., "Work", "Personal")
+- **Order**: Your custom drag-and-drop arrangement of subscriptions
+
+<Info>
+  All data is stored in a local database on your device. Nothing is ever sent to external servers or the cloud.
+</Info>
+
+## How Data is Stored
+
+Recur uses **MMKV** (Memory Mapped Key-Value), a fast and efficient mobile storage solution:
+
+- **Key-value pairs**: Data is stored as JSON objects with unique keys
+- **Validated storage**: All data is validated using Zod schemas before saving
+- **Persistent**: Data remains on your device until you delete the app
+- **Efficient**: MMKV provides better performance than AsyncStorage or SQLite for this use case
+
+### Storage Keys
+
+While you don't need to know these implementation details, here's what happens behind the scenes:
+
+- `user_name`: Your personalized name
+- `onboarding_complete`: Setup completion status
+- `subscriptions`: Array of all your subscriptions
+- `lists`: Your custom organization lists
+- `currency`: Your default currency setting
+
+## Data Persistence
+
+### Data Stays Until Deletion
+
+Your subscription data persists across app sessions and device restarts. As long as Recur is installed on your device, your data remains intact.
+
+### What Happens When You Delete the App
+
+<Warning>
+  **Deleting the app permanently erases all your data.** There is no way to recover subscription information after uninstalling Recur.
+</Warning>
+
+When you uninstall Recur:
+
+1. **All local data is deleted**: iOS and Android automatically remove app data when you uninstall
+2. **No recovery possible**: Since there's no cloud backup, your subscriptions cannot be restored
+3. **Complete removal**: No traces of your data remain on the device
+
+This is an intentional privacy feature—your data is never stored anywhere else.
+
+## No Backups or Export
+
+Recur currently does not include:
+
+- **Cloud backups**: No iCloud, Google Drive, or Dropbox integration
+- **Export functionality**: No CSV, JSON, or other data export options
+- **Sync capabilities**: No cross-device synchronization
+
+<Note>
+  If you need to preserve your subscription data before uninstalling, consider taking screenshots of your subscriptions or manually noting them elsewhere.
+</Note>
+
+### Why No Backups?
+
+The decision to exclude backups and export features aligns with Recur's privacy-first design:
+
+- **Simpler codebase**: No complex sync logic or cloud integrations
+- **Better privacy**: No risk of data leaking through backup services
+- **True local-first**: Consistent with the offline-only architecture
+
+## Data Integrity
+
+### Validation and Error Handling
+
+Recur uses runtime validation to ensure data integrity:
+
+- **Zod schemas**: All stored data is validated against TypeScript schemas
+- **Error recovery**: Invalid data is logged and filtered out rather than crashing the app
+- **Normalization**: When reading subscriptions, malformed entries are automatically cleaned
+
+If you encounter data issues:
+
+1. The app logs warnings but continues functioning
+2. Invalid subscriptions are dropped to prevent crashes
+3. Valid data is preserved and re-saved
+
+### Updating Subscriptions
+
+When you edit or delete subscriptions:
+
+- **Atomic updates**: Changes are validated before being saved
+- **Order preservation**: Custom drag-and-drop order is maintained
+- **List relationships**: Deleting a list sets subscriptions to "Unassigned" rather than deleting them
+
+## Storage Limits
+
+MMKV has no practical storage limits for typical use:
+
+- **Scalable**: Can handle hundreds or thousands of subscriptions
+- **Fast lookups**: Data retrieval is optimized for quick access
+- **Low overhead**: Minimal impact on app size or performance
+
+You're unlikely to hit any storage constraints in normal usage.
+
+## Privacy Benefits
+
+Local-only storage provides several privacy advantages:
+
+### No Data Transmission
+- Your subscription amounts, billing cycles, and payment details never leave your device
+- No network requests means no risk of data interception
+- No servers means no potential for data breaches
+
+### Device Security
+- Data is protected by your device's built-in security (biometrics, passcode)
+- On iOS and Android, app data is sandboxed and isolated from other apps
+- MMKV stores data in the app's private directory
+
+### Complete Deletion
+- Uninstalling the app removes all traces of your data
+- No residual data on cloud servers
+- No data retention policies or backup windows to worry about
+
+<Info>
+  Because Recur uses local storage only, your subscription data benefits from your device's existing security features like encryption, biometric locks, and secure boot.
+</Info>
+
+## Comparison to Cloud-Based Apps
+
+| Feature | Recur (Local) | Cloud-Based Apps |
+|---------|---------------|------------------|
+| **Data location** | On your device only | Stored on remote servers |
+| **Requires account** | No | Yes |
+| **Works offline** | Always | Needs internet for sync |
+| **Cross-device sync** | Not available | Available |
+| **Data recovery** | Not possible | Backup & restore |
+| **Privacy** | Complete | Depends on provider |
+| **Export options** | None | Usually available |
+
+Recur's local-first approach trades convenience features like sync and backups for stronger privacy guarantees and complete data ownership.

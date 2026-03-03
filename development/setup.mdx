@@ -1,0 +1,164 @@
+---
+title: Development Setup
+description: Set up your local development environment for Recur
+---
+
+Get your development environment ready to contribute to Recur. This guide covers prerequisites, installation, and running the app locally.
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- **Node.js** (v18 or higher) - [Download here](https://nodejs.org/)
+- **Package Manager** - Bun (recommended), npm, or yarn
+  - [Bun](https://bun.sh/) - Fast JavaScript runtime and package manager
+- **Expo CLI** - Installed globally or via npx
+- **Mobile Development Setup**:
+  - **iOS**: Xcode and iOS Simulator (macOS only)
+  - **Android**: Android Studio and Android Emulator
+  - **Physical Device**: [Expo Go](https://expo.dev/go) app installed
+
+## Installation
+
+<Steps>
+  <Step title="Clone the repository">
+    Clone the Recur repository to your local machine:
+
+    ```bash
+    git clone https://github.com/yeetfactory/recur.git
+    cd recur
+    ```
+  </Step>
+
+  <Step title="Install dependencies">
+    Install all required packages using your preferred package manager:
+
+    <CodeGroup>
+      ```bash bun
+      bun install
+      ```
+
+      ```bash npm
+      npm install
+      ```
+
+      ```bash yarn
+      yarn install
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Start the development server">
+    Launch the Expo development server:
+
+    <CodeGroup>
+      ```bash bun
+      bun dev
+      ```
+
+      ```bash npm
+      npm run dev
+      ```
+
+      ```bash yarn
+      yarn dev
+      ```
+    </CodeGroup>
+
+    This command starts the server with cache cleared (`expo start -c`).
+  </Step>
+
+  <Step title="Run the app">
+    Once the dev server is running, you have several options:
+
+    - Press **`i`** to open in iOS Simulator (macOS only)
+    - Press **`a`** to open in Android Emulator
+    - Press **`w`** to open in web browser
+    - Scan the **QR code** with Expo Go on your physical device
+  </Step>
+</Steps>
+
+## Available Scripts
+
+Recur includes several npm scripts for development and building:
+
+| Command | Description |
+|---------|-------------|
+| `dev` | Start Expo dev server (clears cache) |
+| `ios` | Build and run on iOS |
+| `android` | Build and run on Android |
+| `web` | Start web development server |
+| `clean` | Remove `.expo` and `node_modules` directories |
+
+### Running Scripts
+
+<CodeGroup>
+  ```bash bun
+  bun dev
+  bun ios
+  bun android
+  bun web
+  bun clean
+  ```
+
+  ```bash npm
+  npm run dev
+  npm run ios
+  npm run android
+  npm run web
+  npm run clean
+  ```
+
+  ```bash yarn
+  yarn dev
+  yarn ios
+  yarn android
+  yarn web
+  yarn clean
+  ```
+</CodeGroup>
+
+## Development Tips
+
+<Tip>
+  Use `bun dev` (or equivalent) instead of `expo start` to ensure the cache is cleared, preventing stale build issues.
+</Tip>
+
+<Note>
+  The app uses MMKV for local storage. All data persists on-device between app restarts during development.
+</Note>
+
+## Troubleshooting
+
+### Metro bundler issues
+
+If you encounter bundler errors, try cleaning the project:
+
+```bash
+bun clean
+bun install
+bun dev
+```
+
+### iOS Simulator not opening
+
+Ensure Xcode is installed and the iOS Simulator is properly configured:
+
+```bash
+sudo xcode-select --switch /Applications/Xcode.app
+```
+
+### Android Emulator not detected
+
+Verify that Android Studio is installed and an AVD (Android Virtual Device) is created. Check that `ANDROID_HOME` is set in your environment variables.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Project Structure" icon="folder-tree" href="/development/project-structure">
+    Learn about the codebase organization and routing
+  </Card>
+  <Card title="Architecture" icon="sitemap" href="/concepts/architecture">
+    Understand the technical architecture
+  </Card>
+</CardGroup>

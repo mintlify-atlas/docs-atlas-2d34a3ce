@@ -1,0 +1,303 @@
+---
+title: Data Models
+description: TypeScript types and Zod schemas for Subscription, List, and Currency data models
+---
+
+## Overview
+
+Recur uses [Zod](https://zod.dev) for schema-first data modeling, providing both runtime validation and compile-time type safety. All data models are defined in `types.ts`.
+
+## Subscription
+
+The core data model representing a recurring subscription.
+
+### Schema Definition
+
+```typescript
+import { z } from 'zod';
+
+export const Zod_Subscription = z.object({
+  id: z.string(),
+  name: z.string().trim().min(1),
+  icon: z.string().nullable(), // emoji or null for initials fallback
+  listId: Zod_List.shape.id.trim().min(1).nullable().optional(),
+  frequency: Zod_SubscriptionFrequency,
+  amount: z.number().nonnegative(),
+  currency: Zod_Currency,
+  startDate: z.coerce.date(),
+});
+
+export type Subscription = z.infer<typeof Zod_Subscription>;
+```
+
+### Fields
+
+<ParamField path="id" type="string" required>
+  Unique identifier generated using `generateUUID()` from `lib/utils.ts`
+</ParamField>
+
+<ParamField path="name" type="string" required>
+  Subscription name (trimmed, minimum 1 character). Examples: "Netflix", "Spotify", "Adobe Creative Cloud"
+</ParamField>
+
+<ParamField path="icon" type="string | null" required>
+  Emoji icon for the subscription. When `null`, the UI displays initials as a fallback.
+  
+  Example: "🎬" for Netflix, "🎵" for Spotify
+</ParamField>
+
+<ParamField path="listId" type="string | null | undefined">
+  Reference to a List ID. Subscriptions can optionally be organized into lists.
+  
+  - `string`: Belongs to a specific list
+  - `null`: Not assigned to any list
+  - `undefined`: Legacy data, treated as not assigned
+</ParamField>
+
+<ParamField path="frequency" type="'monthly' | 'yearly'" required>
+  Billing frequency of the subscription
+</ParamField>
+
+<ParamField path="amount" type="number" required>
+  Subscription cost (non-negative). Stored as a decimal number.
+  
+  Example: `9.99`, `199.00`
+</ParamField>
+
+<ParamField path="currency" type="Currency" required>
+  Three-letter ISO 4217 currency code. See [Currency](#currency) for supported currencies.
+  
+  Example: `"USD"`, `"EUR"`, `"GBP"`
+</ParamField>
+
+<ParamField path="startDate" type="Date" required>
+  Subscription start date. Zod coerces input to Date object.
+  
+  Used to calculate billing cycles and track subscription age.
+</ParamField>
+
+### Frequency Type
+
+```typescript
+export const SUBSCRIPTION_FREQUENCIES = ['monthly', 'yearly'] as const;
+
+const Zod_SubscriptionFrequency = z.enum(SUBSCRIPTION_FREQUENCIES);
+
+export type SubscriptionFrequency = z.infer<typeof Zod_SubscriptionFrequency>;
+```
+
+## List
+
+Organize subscriptions into custom lists (e.g., "Work", "Personal", "Family").
+
+### Schema Definition
+
+```typescript
+export const Zod_List = z.object({
+  id: z.string().min(1),
+  name: z.string().trim().min(1),
+});
+
+export type List = z.infer<typeof Zod_List>;
+```
+
+### Fields
+
+<ParamField path="id" type="string" required>
+  Unique identifier for the list
+</ParamField>
+
+<ParamField path="name" type="string" required>
+  Display name for the list (trimmed, minimum 1 character)
+  
+  Examples: "Work", "Personal", "Entertainment"
+</ParamField>
+
+## Currency
+
+Supported currency codes based on ISO 4217.
+
+### Schema Definition
+
+```typescript
+import { CURRENCY_CODES } from './const';
+
+export const Zod_Currency = z.enum(CURRENCY_CODES);
+
+export type Currency = z.infer<typeof Zod_Currency>;
+```
+
+### Supported Currencies
+
+Recur supports **180+ currencies** with full metadata including symbols, decimal digits, and country associations.
+
+Each currency includes:
+
+<ParamField path="code" type="string">
+  Three-letter ISO 4217 code (e.g., `"USD"`, `"EUR"`, `"JPY"`)
+</ParamField>
+
+<ParamField path="symbol" type="string">
+  Currency symbol (e.g., `"$"`, `"€"`, `"¥"`)
+</ParamField>
+
+<ParamField path="digits" type="number">
+  Number of decimal places (e.g., `2` for USD, `0` for JPY)
+</ParamField>
+
+<ParamField path="currency" type="string">
+  Full currency name (e.g., `"US Dollar"`, `"Euro"`, `"Yen"`)
+</ParamField>
+
+<ParamField path="countries" type="string[]">
+  Countries using this currency
+</ParamField>
+
+### Popular Currencies
+
+```typescript
+// From const.ts
+{
+  code: 'USD',
+  symbol: '$',
+  digits: 2,
+  currency: 'US Dollar',
+  countries: ['United States of America (The)', ...]
+}
+
+{
+  code: 'EUR',
+  symbol: '€',
+  digits: 2,
+  currency: 'Euro',
+  countries: ['Germany', 'France', 'Italy', ...]
+}
+
+{
+  code: 'GBP',
+  symbol: '£',
+  digits: 2,
+  currency: 'Pound Sterling',
+  countries: ['United Kingdom of Great Britain and Northern Ireland (The)', ...]
+}
+
+{
+  code: 'JPY',
+  symbol: '¥',
+  digits: 0,
+  currency: 'Yen',
+  countries: ['Japan']
+}
+```
+
+See const.ts:1 for the complete currency list.
+
+## Validation Patterns
+
+### Creating Subscriptions
+
+From actions/subscription.ts:43:
+
+```typescript
+import { Zod_Subscription } from '@/types';
+
+const Zod_CreateSubscriptionSchema = Zod_Subscription.omit({ id: true });
+
+export const createSubscription = (args: CreateSubscription) => {
+  const validated = Zod_CreateSubscriptionSchema.safeParse(args);
+  if (!validated.success) {
+    logger.error('Invalid input for createSubscription', validated.error);
+    throw new Error('Invalid input');
+  }
+
+  const subscription: Subscription = {
+    id: generateUUID(),
+    ...validated.data,
+  };
+
+  const subscriptions = getSubscriptions();
+  subscriptions.push(subscription);
+  mmkv.set(SUBSCRIPTIONS_KEY, subscriptions);
+  
+  return subscription;
+};
+```
+
+### Data Normalization
+
+From actions/subscription.ts:17:
+
+```typescript
+const normalizeSubscriptions = (raw: unknown): Subscription[] => {
+  if (!Array.isArray(raw)) return [];
+
+  const parsedArray = Zod_SubscriptionArray.safeParse(raw);
+  if (parsedArray.success) {
+    return parsedArray.data;
+  }
+
+  // Gracefully handle partial corruption
+  const cleaned: Subscription[] = [];
+  let dropped = 0;
+  for (const item of raw) {
+    const parsed = Zod_Subscription.safeParse(item);
+    if (parsed.success) {
+      cleaned.push(parsed.data);
+    } else {
+      dropped += 1;
+    }
+  }
+
+  if (dropped > 0) {
+    logger.warn(`Dropped ${dropped} invalid subscription(s) from storage`);
+  }
+
+  return cleaned;
+};
+```
+
+This pattern ensures data integrity even if storage becomes corrupted.
+
+## Type Safety Benefits
+
+### Compile-Time Checking
+
+```typescript
+const subscription: Subscription = {
+  id: '123',
+  name: 'Netflix',
+  icon: '🎬',
+  frequency: 'monthly',
+  amount: 9.99,
+  currency: 'USD',
+  startDate: new Date(),
+  // TypeScript error: listId is missing but that's ok (optional)
+};
+```
+
+### Runtime Validation
+
+```typescript
+const userInput = {
+  name: '',  // Invalid: min length 1
+  amount: -5, // Invalid: must be non-negative
+};
+
+const result = Zod_Subscription.safeParse(userInput);
+if (!result.success) {
+  console.error(result.error.issues);
+  // [
+  //   { path: ['name'], message: 'String must contain at least 1 character(s)' },
+  //   { path: ['amount'], message: 'Number must be greater than or equal to 0' }
+  // ]
+}
+```
+
+### Type Inference
+
+```typescript
+// No need to manually define types
+export type Subscription = z.infer<typeof Zod_Subscription>;
+
+// Types stay in sync with schemas automatically
+```

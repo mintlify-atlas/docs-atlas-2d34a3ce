@@ -1,0 +1,141 @@
+---
+title: Currency API
+description: API functions for managing default currency settings in Recur
+---
+
+## setDefaultCurrency
+
+Sets the default currency for the application.
+
+```typescript
+import { setDefaultCurrency } from '@/actions/currency';
+
+const currency = setDefaultCurrency({ currency: 'USD' });
+console.log('Default currency set to:', currency); // 'USD'
+```
+
+<ParamField path="currency" type="Currency" required>
+  The currency code to set as default. Must be a valid currency code from the `CURRENCY_CODES` enum.
+  
+  The currency parameter is passed as an object property:
+  ```typescript
+  { currency: Currency }
+  ```
+</ParamField>
+
+<ResponseField name="currency" type="Currency">
+  Returns the validated currency code that was set.
+</ResponseField>
+
+### Validation
+
+The function validates input using `Zod_SetDefaultCurrencySchema`, which expects:
+```typescript
+z.object({
+  currency: Zod_Currency,
+})
+```
+
+If validation fails:
+- Logs an error with the validation details
+- Throws an `Error` with message "Invalid currency"
+
+### Storage
+
+The currency is persisted to MMKV storage under the key `'default_currency'`.
+
+### Example with TypeScript
+
+```typescript
+import { Currency } from '@/types';
+import { setDefaultCurrency } from '@/actions/currency';
+
+const updateCurrency = (newCurrency: Currency) => {
+  try {
+    const currency = setDefaultCurrency({ currency: newCurrency });
+    console.log('Successfully updated to:', currency);
+  } catch (error) {
+    console.error('Failed to set currency:', error);
+  }
+};
+
+updateCurrency('EUR');
+```
+
+---
+
+## getDefaultCurrency
+
+Retrieves the default currency from storage.
+
+```typescript
+import { getDefaultCurrency } from '@/actions/currency';
+
+const currency = getDefaultCurrency();
+if (currency) {
+  console.log('Default currency:', currency);
+} else {
+  console.log('No default currency set');
+}
+```
+
+<ResponseField name="currency" type="Currency | null">
+  Returns the stored currency code if valid, or `null` if:
+  - No currency has been set
+  - The stored currency is invalid/corrupted
+</ResponseField>
+
+### Validation
+
+The function validates the stored value using `Zod_Currency`. If validation fails:
+- Logs an error with the validation details
+- Returns `null` instead of throwing an error
+
+This graceful error handling ensures the app can function even if stored data is corrupted.
+
+### Example Usage
+
+```typescript
+import { getDefaultCurrency, setDefaultCurrency } from '@/actions/currency';
+
+const ensureDefaultCurrency = () => {
+  const currency = getDefaultCurrency();
+  
+  if (!currency) {
+    // Set a default if none exists
+    setDefaultCurrency({ currency: 'USD' });
+    return 'USD';
+  }
+  
+  return currency;
+};
+
+const currentCurrency = ensureDefaultCurrency();
+```
+
+### Source Reference
+
+See implementation in `/home/daytona/workspace/source/actions/currency.ts:28-43`
+
+---
+
+## Currency Type
+
+The `Currency` type is defined as:
+
+```typescript
+import { z } from 'zod';
+import { CURRENCY_CODES } from '@/const';
+
+export const Zod_Currency = z.enum(CURRENCY_CODES);
+export type Currency = z.infer<typeof Zod_Currency>;
+```
+
+This means the currency must be one of the valid currency codes defined in the `CURRENCY_CODES` constant. Common examples include:
+- `'USD'` - US Dollar
+- `'EUR'` - Euro
+- `'GBP'` - British Pound
+- `'JPY'` - Japanese Yen
+- And many more...
+
+Refer to `/home/daytona/workspace/source/const.ts` for the complete list of supported currencies.

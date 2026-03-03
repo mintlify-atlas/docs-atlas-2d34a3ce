@@ -1,0 +1,157 @@
+---
+title: "Components Overview"
+description: "Overview of Recur's component architecture and UI system"
+---
+
+# Components Overview
+
+Recur's component architecture is built on React Native primitives with NativeWind for styling, creating a consistent and responsive UI across iOS, Android, and web platforms.
+
+## Architecture
+
+The component system is organized into two main layers:
+
+### Feature Components
+
+High-level components that implement specific features:
+- **Dialog Components**: User interactions for adding and editing subscriptions
+- **Subscription Components**: Avatars, icons, and visual representations
+- **Picker Components**: Specialized input components like the emoji picker
+
+These components are located in `components/` and compose UI primitives to create complete features.
+
+### UI Primitives
+
+Reusable, low-level components that form the design system foundation:
+- **Layout**: Sheet, Dialog, Card, View
+- **Form Controls**: Button, Input, DateTimePicker
+- **Typography**: Text with variants
+- **Icons**: Icon wrapper components
+- **Feedback**: Alert dialogs, Progress indicators
+
+UI primitives are located in `components/ui/` and follow a consistent API design pattern.
+
+## Styling with NativeWind
+
+All components use **NativeWind**, a utility-first styling system that brings Tailwind CSS to React Native:
+
+```tsx
+<View className="flex-row items-center gap-4 rounded-xl border border-border bg-card/50 p-3">
+  <Input className="border-0 bg-transparent" />
+</View>
+```
+
+### Theme Support
+
+Components automatically adapt to light/dark themes using NativeWind's `useColorScheme` hook:
+
+```tsx
+import { useColorScheme } from 'nativewind';
+
+const { colorScheme } = useColorScheme();
+const isDark = colorScheme === 'dark';
+```
+
+### Responsive Design
+
+NativeWind supports responsive variants for different screen sizes:
+
+```tsx
+<Text className="text-base sm:text-sm" />
+<View className="mx-4 w-auto max-w-none sm:max-w-lg" />
+```
+
+## Component Patterns
+
+### Controlled Components
+
+Most form components follow React's controlled component pattern:
+
+```tsx
+const [name, setName] = React.useState('');
+
+<Input
+  value={name}
+  onChangeText={setName}
+  placeholder="Enter name"
+/>
+```
+
+### Variant-Based Styling
+
+Components use `class-variance-authority` (CVA) for variant management:
+
+```tsx
+<Button variant="default" size="lg">
+  <Text>Primary Action</Text>
+</Button>
+
+<Button variant="outline" size="sm">
+  <Text>Secondary Action</Text>
+</Button>
+```
+
+### Platform-Specific Behavior
+
+Components handle platform differences automatically:
+
+```tsx
+{Platform.OS === 'ios' ? (
+  <DateTimePicker display="default" />
+) : (
+  <Pressable onPress={() => setShowDatePicker(true)}>
+    <Text>{date}</Text>
+  </Pressable>
+)}
+```
+
+## Component Documentation
+
+<CardGroup cols={2}>
+  <Card title="Dialog Components" icon="window" href="/components/dialogs">
+    AddSubscriptionsDialog and EditSubscriptionDialog for managing subscriptions
+  </Card>
+  <Card title="UI Primitives" icon="palette" href="/components/ui-primitives">
+    Base UI components from the design system
+  </Card>
+</CardGroup>
+
+## Key Features
+
+### Accessibility
+
+Components include accessibility features:
+- `testID` props for testing
+- Role attributes for screen readers
+- Proper hit slop areas for touch targets
+- ARIA labels where applicable
+
+### Performance
+
+Components are optimized for performance:
+- `React.memo` for expensive renders
+- Hoisted constants to avoid re-creation
+- Efficient state management
+- Lazy loading where appropriate
+
+### Type Safety
+
+All components are fully typed with TypeScript:
+
+```tsx
+interface AddSubscriptionDialogProps {
+  onSubscriptionCreated?: () => void;
+}
+
+export function AddSubscriptionDialog({ 
+  onSubscriptionCreated 
+}: AddSubscriptionDialogProps) {
+  // Implementation
+}
+```
+
+## Next Steps
+
+- Learn about [Dialog Components](/components/dialogs)
+- Explore [UI Primitives](/components/ui-primitives)
+- Review the [Data Models](/concepts/data-models) for type definitions

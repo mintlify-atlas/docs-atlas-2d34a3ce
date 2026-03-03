@@ -1,0 +1,171 @@
+---
+title: Lists API
+description: API functions for managing subscription lists in Recur
+---
+
+## createList
+
+Creates a new list with a generated UUID.
+
+```typescript
+import { createList } from '@/actions/list';
+
+const list = createList('Streaming Services');
+console.log(list); // { id: 'uuid...', name: 'Streaming Services' }
+```
+
+<ParamField path="name" type="string" required>
+  The name of the list. Must be a non-empty string after trimming.
+</ParamField>
+
+<ResponseField name="list" type="List">
+  Returns the created list object with a generated `id` field.
+  
+  ```typescript
+  {
+    id: string;      // Generated UUID
+    name: string;    // The validated list name
+  }
+  ```
+</ResponseField>
+
+### Validation
+
+The function validates input using `Zod_ListNameSchema` (extracted from `Zod_List.shape.name`). If validation fails:
+- Logs an error with the validation details
+- Throws an `Error` with message "Invalid input"
+
+### Storage
+
+The list is automatically persisted to MMKV storage under the key `'lists'`.
+
+---
+
+## updateList
+
+Updates the name of an existing list by ID.
+
+```typescript
+import { updateList } from '@/actions/list';
+
+const updated = updateList('list-uuid', 'Entertainment Services');
+
+if (!updated) {
+  console.log('List not found');
+} else {
+  console.log('Updated:', updated.name);
+}
+```
+
+<ParamField path="id" type="string" required>
+  The ID of the list to update. Must be a non-empty string.
+</ParamField>
+
+<ParamField path="name" type="string" required>
+  The new name for the list. Must be a non-empty string after trimming.
+</ParamField>
+
+<ResponseField name="result" type="List | null">
+  Returns the updated list object if found, or `null` if the list with the given ID does not exist.
+</ResponseField>
+
+### Validation
+
+The function validates both parameters:
+- `id` using `Zod_ListIdSchema`
+- `name` using `Zod_ListNameSchema`
+
+If either validation fails:
+- Logs an error with the validation details
+- Throws an `Error` with message "Invalid input"
+
+### Behavior
+
+- If the list ID is not found, logs a warning and returns `null`
+- If found, updates the name and persists to storage
+
+---
+
+## removeList
+
+Removes a list by ID and clears the `listId` field from all subscriptions that reference it.
+
+```typescript
+import { removeList } from '@/actions/list';
+
+const removed = removeList('list-uuid');
+
+if (removed) {
+  console.log('Removed list:', removed.name);
+}
+```
+
+<ParamField path="id" type="string" required>
+  The ID of the list to remove. Must be a non-empty string.
+</ParamField>
+
+<ResponseField name="result" type="List | null">
+  Returns the removed list object if found and removed, or `null` if the list was not found.
+</ResponseField>
+
+### Validation
+
+The function validates the `id` using `Zod_ListIdSchema`. If validation fails:
+- Logs an error with the validation details
+- Throws an `Error` with message "Invalid input"
+
+### Side Effects
+
+When a list is removed, the function also:
+1. Retrieves all subscriptions using `getSubscriptions()`
+2. Maps through subscriptions and sets `listId` to `null` for any subscription that referenced the removed list
+3. Saves the updated subscriptions using `saveSubscriptions()`
+4. Removes the list from the lists array
+5. Persists the updated lists to storage
+
+```typescript
+// Example: If list 'abc' is removed
+const subscriptionsWithRemovedLists = subscriptions.map((subscription) =>
+  subscription.listId === 'abc' 
+    ? { ...subscription, listId: null } 
+    : subscription
+);
+```
+
+### Behavior
+
+- If the list ID is not found, logs a warning and returns `null`
+- If found, performs the cleanup operations described above
+
+---
+
+## getLists
+
+Retrieves all lists from storage.
+
+```typescript
+import { getLists } from '@/actions/list';
+
+const lists = getLists();
+console.log(`Total lists: ${lists.length}`);
+```
+
+<ResponseField name="lists" type="List[]">
+  Returns an array of all valid lists. Invalid lists are filtered out and logged.
+</ResponseField>
+
+### Normalization
+
+The function automatically normalizes stored data:
+1. If the stored value is not an array, returns an empty array
+2. Attempts to parse the entire array with `Zod_ListArray`
+3. If array validation fails, validates each item individually:
+   - Valid items are included in the result
+   - Invalid items are dropped and a warning is logged with the count
+4. If any invalid items were dropped, the cleaned array is saved back to storage
+
+This ensures data integrity even if corrupted data exists in storage.
+
+### Source Reference
+
+See implementation in `/home/daytona/workspace/source/actions/list.ts:112-119`

@@ -1,0 +1,149 @@
+---
+title: Multi-Currency Support
+description: Select your default currency and understand currency lock behavior
+---
+
+Recur supports a wide range of international currencies, allowing you to track subscriptions in your preferred currency with proper symbols and formatting.
+
+## Currency Selection
+
+You set your default currency during the onboarding process.
+
+<Steps>
+  <Step title="Launch Recur for the first time">
+    Open Recur after installation to begin onboarding.
+  </Step>
+  
+  <Step title="Enter your details">
+    On the "Tell us about yourself" screen, enter your name.
+  </Step>
+  
+  <Step title="Open the currency selector">
+    Tap the **Default currency** field to open the currency selection dialog.
+  </Step>
+  
+  <Step title="Search for your currency">
+    Use the search bar to find your currency by:
+    - Currency code (e.g., "USD", "EUR", "GBP")
+    - Currency name (e.g., "Dollar", "Euro", "Pound")
+    - Country name (e.g., "United States", "Germany", "Japan")
+  </Step>
+  
+  <Step title="Select your currency">
+    Tap your preferred currency from the filtered results.
+  </Step>
+  
+  <Step title="Review the warning">
+    Notice the amber warning message: **"Currency cannot be changed later"**.
+  </Step>
+  
+  <Step title="Continue setup">
+    Tap **Continue** to proceed with your selected currency.
+  </Step>
+</Steps>
+
+## Supported Currencies
+
+Recur includes a comprehensive list of international currencies, including:
+
+- **USD** - US Dollar ($)
+- **EUR** - Euro (€)
+- **GBP** - British Pound (£)
+- **JPY** - Japanese Yen (¥)
+- **AUD** - Australian Dollar ($)
+- **CAD** - Canadian Dollar ($)
+- **CHF** - Swiss Franc (Fr.)
+- **CNY** - Chinese Yuan (¥)
+- **INR** - Indian Rupee (₹)
+- And many more...
+
+Each currency includes:
+
+- **Symbol**: The proper currency symbol (e.g., $, €, £)
+- **Code**: Three-letter ISO code (e.g., USD, EUR)
+- **Name**: Full currency name
+- **Countries**: Associated countries
+
+## Currency Display
+
+Your selected currency is used throughout the app:
+
+### Dashboard
+
+- Chart total displays with your currency symbol
+- All subscription cards show amounts in your currency
+
+### Subscription Forms
+
+- When adding subscriptions, the amount input shows your currency symbol
+- When editing subscriptions, the currency symbol appears next to the amount field
+
+### Calculations
+
+- Monthly/yearly conversions use your currency
+- Totals across all subscriptions display in your currency
+
+## Currency Lock Behavior
+
+<Warning>
+  **Important**: Your default currency cannot be changed after onboarding. This is an intentional design decision.
+</Warning>
+
+### Why Currency Is Locked
+
+Recur locks your currency selection to:
+
+1. **Maintain Data Consistency**: All subscriptions are stored with the same currency, ensuring accurate totals
+2. **Prevent Conversion Issues**: Avoiding currency conversion errors and exchange rate complexity
+3. **Simplify the Experience**: Users track expenses in one consistent currency
+
+### What This Means
+
+- Choose your currency carefully during onboarding
+- All subscriptions you add will use this currency
+- You cannot switch to a different currency later
+- If you need to change currency, you would need to reinstall the app (this clears all local data)
+
+### Best Practices
+
+<Note>
+  Select the currency you use for most of your subscriptions. If you have subscriptions in multiple currencies, consider:
+  - Choosing your primary/most common currency
+  - Manually converting amounts when adding subscriptions
+  - Using your bank or credit card's currency for reference
+</Note>
+
+## Currency in Mixed Scenarios
+
+If you have subscriptions billed in different currencies:
+
+1. **Choose Your Primary Currency**: Select the currency you're most comfortable with during onboarding
+2. **Convert When Adding**: Manually convert subscription amounts to your default currency
+3. **Use Current Rates**: Check exchange rates at the time of adding subscriptions
+4. **Update as Needed**: Edit subscription amounts if exchange rates change significantly
+
+### Example
+
+If your default currency is USD but you have a subscription in EUR:
+
+<Steps>
+  <Step title="Check the exchange rate">
+    Find the current EUR to USD exchange rate (e.g., 1 EUR = 1.10 USD).
+  </Step>
+  
+  <Step title="Convert the amount">
+    If the subscription costs €9.99/month, convert it: €9.99 × 1.10 = $10.99.
+  </Step>
+  
+  <Step title="Add the subscription">
+    Enter the subscription with the converted amount ($10.99) in Recur.
+  </Step>
+  
+  <Step title="Note the original currency">
+    Optionally include "(€9.99)" in the subscription name as a reminder.
+  </Step>
+</Steps>
+
+## Privacy and Storage
+
+Your currency preference is stored locally on your device using MMKV. It is never sent to any server or cloud service. Your currency data, like all other data in Recur, remains completely private.

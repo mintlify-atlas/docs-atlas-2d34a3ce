@@ -1,0 +1,339 @@
+---
+title: "Dialog Components"
+description: "AddSubscriptionsDialog and EditSubscriptionDialog components for managing subscriptions"
+---
+
+# Dialog Components
+
+Recur provides two main dialog components for managing subscriptions. Both use the Sheet component on mobile for a native bottom-sheet experience.
+
+## AddSubscriptionDialog
+
+A sheet-based dialog for creating new subscriptions.
+
+### Usage
+
+```tsx
+import { AddSubscriptionDialog } from '@/components/add-subscriptions-dialog';
+
+function MyComponent() {
+  const handleCreated = () => {
+    console.log('Subscription created!');
+  };
+
+  return (
+    <AddSubscriptionDialog onSubscriptionCreated={handleCreated} />
+  );
+}
+```
+
+### Props
+
+<ParamField path="onSubscriptionCreated" type="() => void" optional>
+  Callback function invoked after a subscription is successfully created.
+</ParamField>
+
+### Features
+
+**Form Fields:**
+- **Service Name**: Text input with avatar/emoji picker
+- **Icon**: Custom emoji or auto-generated initials
+- **List Assignment**: Optional list selection (if lists exist)
+- **Frequency**: Weekly, monthly, or yearly billing cycles
+- **Amount**: Numeric input with currency symbol
+- **Start Date**: Platform-specific date picker (iOS inline, Android modal)
+
+**Validation:**
+- Name is required
+- Amount must be a valid number
+- Date must be in YYYY-MM-DD format
+- Real-time error clearing on input change
+
+**Implementation Example:**
+
+```tsx
+const [name, setName] = React.useState('');
+const [icon, setIcon] = React.useState<string | null>(null);
+const [frequency, setFrequency] = React.useState<SubscriptionFrequency>('monthly');
+const [amount, setAmount] = React.useState('');
+const [date, setDate] = React.useState(todayDateInput());
+
+const handleCreate = () => {
+  const parsedAmount = parseAmount(amount);
+  const parsedDate = parseDateInput(date);
+  
+  if (parsedAmount && parsedDate) {
+    createSubscription({
+      name: name.trim(),
+      icon,
+      frequency,
+      amount: parsedAmount,
+      currency: defaultCurrency,
+      listId: selectedListId,
+      startDate: parsedDate,
+    });
+  }
+};
+```
+
+### File Location
+
+`components/add-subscriptions-dialog.tsx:1-359`
+
+## EditSubscriptionDialog
+
+A sheet-based dialog for updating existing subscriptions.
+
+### Usage
+
+```tsx
+import { EditSubscriptionDialog } from '@/components/edit-subscription-dialog';
+import { Subscription } from '@/types';
+
+function MyComponent({ subscription }: { subscription: Subscription }) {
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  return (
+    <EditSubscriptionDialog
+      subscription={subscription}
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      onUpdate={() => console.log('Updated!')}
+    />
+  );
+}
+```
+
+### Props
+
+<ParamField path="subscription" type="Subscription | null" required>
+  The subscription object to edit. If null, the dialog won't display data.
+</ParamField>
+
+<ParamField path="open" type="boolean" required>
+  Controls whether the dialog is visible.
+</ParamField>
+
+<ParamField path="onOpenChange" type="(open: boolean) => void" required>
+  Callback to handle dialog open/close state changes.
+</ParamField>
+
+<ParamField path="onUpdate" type="() => void" optional>
+  Callback invoked after a subscription is successfully updated.
+</ParamField>
+
+### Features
+
+Similar to AddSubscriptionDialog, but:
+- Pre-fills form fields with existing subscription data
+- Uses `updateSubscription` instead of `createSubscription`
+- Preserves the original currency (not editable)
+- Updates list assignment if lists have changed
+
+**Pre-filling Example:**
+
+```tsx
+React.useEffect(() => {
+  if (open && subscription) {
+    setName(subscription.name);
+    setIcon(subscription.icon);
+    setFrequency(subscription.frequency);
+    setAmount(subscription.amount.toString());
+    setDate(formatDateInput(subscription.startDate) || todayDateInput());
+    setSelectedListId(subscription.listId);
+    setErrors({});
+  }
+}, [open, subscription, lists]);
+```
+
+### File Location
+
+`components/edit-subscription-dialog.tsx:1-356`
+
+## Shared Components
+
+Both dialogs use these common components:
+
+### SubscriptionAvatar
+
+Displays a subscription icon (emoji or initials).
+
+```tsx
+import { SubscriptionAvatar } from '@/components/subscription-avatar';
+
+<SubscriptionAvatar
+  name={name || 'Ab'}
+  icon={icon}
+  size={52}
+  onPress={() => setShowEmojiPicker(true)}
+  showEditHint={true}
+/>
+```
+
+**Props:**
+
+<ParamField path="name" type="string | null" optional>
+  Service name used to generate initials and color.
+</ParamField>
+
+<ParamField path="icon" type="string | null" optional>
+  Emoji string to display. If null, shows initials.
+</ParamField>
+
+<ParamField path="size" type="number" default={40}>
+  Size of the avatar in pixels.
+</ParamField>
+
+<ParamField path="onPress" type="() => void" optional>
+  Callback when avatar is pressed.
+</ParamField>
+
+<ParamField path="showEditHint" type="boolean" default={false}>
+  Shows a small edit icon badge on the avatar.
+</ParamField>
+
+<ParamField path="testID" type="string" optional>
+  Test identifier for automated testing.
+</ParamField>
+
+**Features:**
+- Auto-generates 2-letter initials from name
+- Theme-aware color palette (warm browns/oranges)
+- Smooth press animations
+- Edit indicator badge when editable
+
+**Color Generation:**
+
+```tsx
+const getThemeColor = (name: string, isDark: boolean): string => {
+  const colors = isDark ? THEME_COLORS_DARK : THEME_COLORS_LIGHT;
+  
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  
+  return colors[Math.abs(hash) % colors.length];
+};
+```
+
+**File:** `components/subscription-avatar.tsx:1-161`
+
+### EmojiPicker
+
+A modal for selecting subscription icons from curated emoji categories.
+
+```tsx
+import { EmojiPicker } from '@/components/emoji-picker';
+
+<EmojiPicker
+  visible={showEmojiPicker}
+  onClose={() => setShowEmojiPicker(false)}
+  onSelect={setIcon}
+  currentEmoji={icon}
+/>
+```
+
+**Props:**
+
+<ParamField path="visible" type="boolean" required>
+  Controls whether the picker modal is visible.
+</ParamField>
+
+<ParamField path="onClose" type="() => void" required>
+  Callback when the picker is closed.
+</ParamField>
+
+<ParamField path="onSelect" type="(emoji: string | null) => void" required>
+  Callback with selected emoji. Passing null removes the icon.
+</ParamField>
+
+<ParamField path="currentEmoji" type="string | null" required>
+  Currently selected emoji (highlighted in the picker).
+</ParamField>
+
+**Categories:**
+
+```tsx
+const EMOJI_CATEGORIES = {
+  Entertainment: ['🎬', '📺', '🎵', '🎧', '🎮', ...],
+  'Music & Audio': ['🎵', '🎶', '🎸', '🎹', ...],
+  'Cloud & Tech': ['☁️', '💾', '💻', '📱', ...],
+  Productivity: ['📝', '📊', '📈', '📅', ...],
+  'Fitness & Health': ['💪', '🏃', '🧘', ...],
+  'Food & Delivery': ['🍕', '🍔', '🥡', ...],
+  'News & Reading': ['📰', '📚', '📖', ...],
+  Finance: ['💰', '💳', '🏦', '📈', ...],
+  Shopping: ['🛍️', '👗', '👟', ...],
+  Other: ['⭐', '🔔', '💡', '🎯', ...],
+};
+```
+
+**File:** `components/emoji-picker.tsx:1-96`
+
+## Styling with NativeWind
+
+Both dialogs extensively use NativeWind for styling:
+
+```tsx
+<View className="gap-3">
+  <Text className="font-recoleta-medium text-sm text-foreground">
+    Service Name
+  </Text>
+  <View className="flex-row items-center gap-4 rounded-xl border border-border bg-card/50 p-3">
+    <SubscriptionAvatar />
+    <View className="flex-1">
+      <Input className="border-0 bg-transparent" />
+    </View>
+  </View>
+</View>
+```
+
+### Common Patterns
+
+**Form Sections:**
+```tsx
+<View className="gap-2">
+  <Text className="font-recoleta-medium text-sm text-foreground">Label</Text>
+  {/* Input component */}
+</View>
+```
+
+**Button Groups:**
+```tsx
+<View className="flex-row gap-2">
+  <Button variant="default" className="flex-1" />
+  <Button variant="outline" className="flex-1" />
+</View>
+```
+
+**Error Messages:**
+```tsx
+{errors.name && (
+  <Text className="text-sm text-destructive">{errors.name}</Text>
+)}
+```
+
+## Testing
+
+Both components include comprehensive `testID` props:
+
+```tsx
+// AddSubscriptionDialog
+testID="add-subscription-open"
+testID="add-subscription-avatar"
+testID="add-subscription-name-input"
+testID="add-subscription-frequency-monthly"
+testID="add-subscription-amount-input"
+testID="add-subscription-save"
+
+// EditSubscriptionDialog
+testID="edit-subscription-avatar"
+testID="edit-subscription-name-input"
+testID="edit-subscription-update"
+```
+
+## Related Components
+
+- [UI Primitives](/components/ui-primitives) - Base components used in dialogs
+- [Data Models](/concepts/data-models) - Subscription and related type definitions

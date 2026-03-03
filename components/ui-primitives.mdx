@@ -1,0 +1,578 @@
+---
+title: "UI Primitives"
+description: "Base UI components from the Recur design system"
+---
+
+# UI Primitives
+
+UI primitives are the foundational components of Recur's design system. Located in `components/ui/`, these components provide consistent styling, behavior, and accessibility across the app.
+
+## Overview
+
+All UI primitives use **NativeWind** for styling and follow these principles:
+
+- **Variant-based design** using `class-variance-authority`
+- **Platform-aware** with web-specific optimizations
+- **Theme support** for light/dark modes
+- **Fully typed** with TypeScript
+- **Accessible** with proper roles and labels
+
+## Layout Components
+
+### Sheet
+
+A bottom sheet component for mobile-friendly dialogs.
+
+**File:** `components/ui/sheet.tsx`
+
+```tsx
+import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
+
+function Example() {
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Pressable>
+          <Text>Open Sheet</Text>
+        </Pressable>
+      </SheetTrigger>
+      <SheetContent
+        title="Sheet Title"
+        description="Sheet description"
+        height="90%"
+        scrollable={true}>
+        {/* Content */}
+      </SheetContent>
+    </Sheet>
+  );
+}
+```
+
+**Props:**
+
+<ParamField path="title" type="string" optional>
+  Sheet header title.
+</ParamField>
+
+<ParamField path="description" type="string" optional>
+  Sheet header description.
+</ParamField>
+
+<ParamField path="height" type="DimensionValue" default="90%">
+  Sheet height (percentage or absolute value).
+</ParamField>
+
+<ParamField path="scrollable" type="boolean" default={true}>
+  Whether content should be scrollable.
+</ParamField>
+
+**Features:**
+- Slide-in animation from bottom
+- Backdrop overlay with dismiss on tap
+- Handle indicator at top
+- Close button in header
+- Configurable height
+
+### Dialog
+
+A centered modal dialog component.
+
+**File:** `components/ui/dialog.tsx`
+
+```tsx
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+
+function Example() {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Pressable>
+          <Text>Open Dialog</Text>
+        </Pressable>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Dialog Title</DialogTitle>
+          <DialogDescription>Dialog description</DialogDescription>
+        </DialogHeader>
+        {/* Content */}
+        <DialogFooter>
+          <Button>Confirm</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
+
+**Features:**
+- Centered with backdrop overlay
+- Fade-in animation
+- Auto-positioned close button
+- Full window overlay on iOS
+- Keyboard-aware on web
+
+### Card
+
+A container component with consistent borders and spacing.
+
+**File:** `components/ui/card.tsx`
+
+```tsx
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+
+<Card>
+  <CardHeader>
+    <CardTitle>Card Title</CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* Content */}
+  </CardContent>
+</Card>
+```
+
+## Form Controls
+
+### Button
+
+A pressable button with multiple variants and sizes.
+
+**File:** `components/ui/button.tsx`
+
+```tsx
+import { Button } from '@/components/ui/button';
+import { Text } from '@/components/ui/text';
+
+<Button variant="default" size="lg" onPress={handlePress}>
+  <Text>Click Me</Text>
+</Button>
+```
+
+**Variants:**
+
+<CodeGroup>
+```tsx default
+<Button variant="default">
+  <Text>Primary Action</Text>
+</Button>
+```
+
+```tsx outline
+<Button variant="outline">
+  <Text>Secondary Action</Text>
+</Button>
+```
+
+```tsx ghost
+<Button variant="ghost">
+  <Text>Subtle Action</Text>
+</Button>
+```
+
+```tsx destructive
+<Button variant="destructive">
+  <Text>Delete</Text>
+</Button>
+```
+
+```tsx link
+<Button variant="link">
+  <Text>Link Style</Text>
+</Button>
+```
+</CodeGroup>
+
+**Sizes:**
+
+```tsx
+<Button size="sm">Small</Button>
+<Button size="default">Default</Button>
+<Button size="lg">Large</Button>
+<Button size="icon">{/* Icon only */}</Button>
+```
+
+**Disabled State:**
+
+```tsx
+<Button disabled={true}>
+  <Text>Disabled</Text>
+</Button>
+```
+
+**Implementation Details:**
+
+```tsx
+const buttonVariants = cva(
+  cn(
+    'group shrink-0 flex-row items-center justify-center gap-2 rounded-md shadow-none',
+    Platform.select({ /* ... */ })
+  ),
+  {
+    variants: {
+      variant: {
+        default: cn(
+          'bg-primary active:bg-primary/90 shadow-sm shadow-black/5',
+          Platform.select({ web: 'hover:bg-primary/90' })
+        ),
+        // ... other variants
+      },
+      size: {
+        default: cn('h-10 px-4 py-2 sm:h-9'),
+        // ... other sizes
+      },
+    },
+  }
+);
+```
+
+### Input
+
+A text input component with consistent styling.
+
+**File:** `components/ui/input.tsx`
+
+```tsx
+import { Input } from '@/components/ui/input';
+
+const [value, setValue] = React.useState('');
+
+<Input
+  value={value}
+  onChangeText={setValue}
+  placeholder="Enter text"
+  keyboardType="default"
+/>
+```
+
+**Common Patterns:**
+
+<CodeGroup>
+```tsx text-input
+<Input
+  placeholder="Name"
+  value={name}
+  onChangeText={setName}
+  autoCapitalize="words"
+/>
+```
+
+```tsx numeric-input
+<Input
+  placeholder="0.00"
+  keyboardType="numeric"
+  inputMode="decimal"
+  value={amount}
+  onChangeText={setAmount}
+/>
+```
+
+```tsx with-icon
+<View className="relative justify-center">
+  <Text className="absolute left-3 z-10">$</Text>
+  <Input className="pl-7" />
+</View>
+```
+</CodeGroup>
+
+**Features:**
+- Automatic debouncing for controlled values
+- Platform-specific styling (web vs native)
+- Focus ring on web
+- Invalid state styling with `aria-invalid`
+- Shadow effects
+
+## Typography
+
+### Text
+
+A text component with theme awareness.
+
+**File:** `components/ui/text.tsx`
+
+```tsx
+import { Text } from '@/components/ui/text';
+
+<Text className="text-lg font-semibold text-foreground">
+  Heading
+</Text>
+
+<Text className="text-sm text-muted-foreground">
+  Description text
+</Text>
+```
+
+**Common Classes:**
+
+```tsx
+// Headings
+<Text className="text-2xl font-bold text-foreground" />
+<Text className="text-lg font-semibold text-foreground" />
+
+// Body
+<Text className="text-base text-foreground" />
+<Text className="text-sm text-muted-foreground" />
+
+// Labels
+<Text className="font-recoleta-medium text-sm text-foreground" />
+
+// Errors
+<Text className="text-sm text-destructive" />
+```
+
+## Feedback Components
+
+### Alert Dialog
+
+A modal dialog for confirmations and alerts.
+
+**File:** `components/ui/alert-dialog.tsx`
+
+```tsx
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from '@/components/ui/alert-dialog';
+
+<AlertDialog>
+  <AlertDialogTrigger asChild>
+    <Button variant="destructive">
+      <Text>Delete</Text>
+    </Button>
+  </AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+      <AlertDialogDescription>
+        This action cannot be undone.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>
+        <Text>Cancel</Text>
+      </AlertDialogCancel>
+      <AlertDialogAction>
+        <Text>Confirm</Text>
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+```
+
+### Progress Dots
+
+Animated loading indicator.
+
+**File:** `components/ui/progress-dots.tsx`
+
+```tsx
+import { ProgressDots } from '@/components/ui/progress-dots';
+
+<ProgressDots />
+```
+
+## Specialized Components
+
+### Icon
+
+Wrapper for Lucide React Native icons.
+
+**File:** `components/ui/icon.tsx`
+
+```tsx
+import { Icon } from '@/components/ui/icon';
+import { CheckIcon, ChevronDownIcon } from 'lucide-react-native';
+
+<Icon as={CheckIcon} className="size-5 text-primary" />
+<Icon as={ChevronDownIcon} className="size-4 text-muted-foreground" />
+```
+
+### Filter Chip
+
+A pill-shaped selectable filter button.
+
+**File:** `components/ui/filter-chip.tsx`
+
+```tsx
+import { FilterChip } from '@/components/ui/filter-chip';
+
+<FilterChip
+  label="Monthly"
+  selected={frequency === 'monthly'}
+  onPress={() => setFrequency('monthly')}
+/>
+```
+
+### Segmented Control
+
+A segmented button group for selecting between options.
+
+**File:** `components/ui/segmented-control.tsx`
+
+```tsx
+import { SegmentedControl } from '@/components/ui/segmented-control';
+
+<SegmentedControl
+  options={['Week', 'Month', 'Year']}
+  selectedIndex={selectedIndex}
+  onIndexChange={setSelectedIndex}
+/>
+```
+
+### Chart
+
+Charting components for data visualization.
+
+**File:** `components/ui/chart.tsx`
+
+```tsx
+import { Chart } from '@/components/ui/chart';
+
+<Chart
+  data={chartData}
+  type="line"
+  config={chartConfig}
+/>
+```
+
+## Complete Component List
+
+All UI primitives in `components/ui/`:
+
+- `alert-dialog.tsx` - Confirmation dialogs
+- `button.tsx` - Pressable buttons
+- `card.tsx` - Container cards
+- `chart.tsx` - Data visualization
+- `dialog.tsx` - Modal dialogs
+- `filter-chip.tsx` - Filter buttons
+- `icon.tsx` - Icon wrapper
+- `input.tsx` - Text inputs
+- `native-only-animated-view.tsx` - Animation wrapper
+- `progress-dots.tsx` - Loading indicator
+- `segmented-control.tsx` - Option selector
+- `sheet.tsx` - Bottom sheets
+- `text.tsx` - Typography
+
+## Styling Patterns
+
+### NativeWind Classes
+
+Common utility classes used throughout:
+
+```tsx
+// Layout
+className="flex-row items-center justify-between"
+className="gap-2 gap-4 gap-6"
+className="p-3 px-4 py-2"
+
+// Borders & Radius
+className="rounded-md rounded-lg rounded-xl"
+className="border border-border border-input"
+
+// Colors
+className="bg-background bg-card bg-muted"
+className="text-foreground text-muted-foreground text-destructive"
+
+// Shadows
+className="shadow-sm shadow-black/5"
+
+// Responsive
+className="h-10 sm:h-9"
+className="max-w-none sm:max-w-lg"
+```
+
+### Platform-Specific Styling
+
+```tsx
+Platform.select({
+  web: 'hover:bg-accent focus:ring-2',
+  native: 'active:bg-accent',
+})
+```
+
+### Dark Mode
+
+```tsx
+className="dark:bg-input/30 dark:border-input"
+```
+
+## Best Practices
+
+### Always Use UI Primitives
+
+Prefer UI primitives over raw React Native components:
+
+```tsx
+// ✅ Good
+import { Button } from '@/components/ui/button';
+import { Text } from '@/components/ui/text';
+
+<Button onPress={handlePress}>
+  <Text>Action</Text>
+</Button>
+
+// ❌ Avoid
+import { Pressable, Text as RNText } from 'react-native';
+
+<Pressable onPress={handlePress}>
+  <RNText>Action</RNText>
+</Pressable>
+```
+
+### Compose Components
+
+Build complex UIs by composing primitives:
+
+```tsx
+<Card>
+  <CardHeader>
+    <CardTitle>Subscription Details</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <View className="gap-4">
+      <Input placeholder="Name" />
+      <Button variant="default">
+        <Text>Save</Text>
+      </Button>
+    </View>
+  </CardContent>
+</Card>
+```
+
+### Use Variants
+
+Leverage built-in variants instead of custom styles:
+
+```tsx
+// ✅ Good
+<Button variant="outline" size="sm">
+  <Text>Action</Text>
+</Button>
+
+// ❌ Avoid
+<Button className="border border-gray-300 h-8 px-2">
+  <Text>Action</Text>
+</Button>
+```
+
+## Related Documentation
+
+- [Dialog Components](/components/dialogs) - High-level dialog implementations
+- [Components Overview](/components/overview) - Architecture overview
+- [Architecture](/concepts/architecture) - Tech stack and NativeWind styling

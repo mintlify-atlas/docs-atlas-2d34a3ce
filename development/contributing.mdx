@@ -1,0 +1,182 @@
+---
+title: Contributing
+description: How to contribute to Recur and help improve the project
+---
+
+Contributions are welcome! Recur is an open-source project, and we appreciate contributions from the community to make it better.
+
+## Getting started
+
+Before contributing, make sure you have set up your development environment by following the [setup guide](/development/setup).
+
+<Steps>
+  <Step title="Fork and clone the repository">
+    Fork the repository on GitHub and clone it to your local machine:
+    
+    ```bash
+    git clone https://github.com/YOUR_USERNAME/recur.git
+    cd recur
+    ```
+  </Step>
+
+  <Step title="Create a new branch">
+    Create a feature branch for your changes:
+    
+    ```bash
+    git checkout -b feature/your-feature-name
+    ```
+  </Step>
+
+  <Step title="Make your changes">
+    Make your changes following the code style guidelines below.
+  </Step>
+
+  <Step title="Test your changes">
+    Test your changes thoroughly on both iOS and Android platforms:
+    
+    ```bash
+    bun dev
+    # Press 'i' for iOS or 'a' for Android
+    ```
+  </Step>
+
+  <Step title="Commit and push">
+    Commit your changes with a clear, descriptive commit message:
+    
+    ```bash
+    git add .
+    git commit -m "Add feature: your feature description"
+    git push origin feature/your-feature-name
+    ```
+  </Step>
+
+  <Step title="Open a pull request">
+    Open a pull request on GitHub with a description of your changes.
+  </Step>
+</Steps>
+
+## Code style
+
+Recur uses [Prettier](https://prettier.io/) for code formatting. The project includes a `.prettierrc` configuration:
+
+```json
+{
+  "printWidth": 100,
+  "tabWidth": 2,
+  "singleQuote": true,
+  "bracketSameLine": true,
+  "trailingComma": "es5",
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "tailwindFunctions": ["cva"]
+}
+```
+
+### Style guidelines
+
+- **TypeScript**: Use TypeScript for all new code
+- **Single quotes**: Use single quotes for strings
+- **Line length**: Maximum 100 characters per line
+- **Indentation**: 2 spaces (no tabs)
+- **Trailing commas**: Use ES5 trailing commas
+- **NativeWind**: Use NativeWind classes for styling, not inline styles
+- **Zod validation**: Use Zod schemas for runtime validation in actions
+
+<Tip>
+  Run Prettier before committing to ensure your code follows the style guidelines:
+  
+  ```bash
+  npx prettier --write .
+  ```
+</Tip>
+
+## Project conventions
+
+### File organization
+
+- **Actions**: Business logic goes in `actions/` directory with Zod validation
+- **Components**: Reusable UI components go in `components/`
+- **Screens**: App screens go in `app/` following Expo Router conventions
+- **Hooks**: Custom React hooks go in `hooks/`
+- **Types**: Shared TypeScript types go in `types.ts`
+- **Constants**: App constants go in `const.ts`
+
+### Naming conventions
+
+- **Files**: Use kebab-case for file names (e.g., `add-subscriptions-dialog.tsx`)
+- **Components**: Use PascalCase for component names (e.g., `AddSubscriptionsDialog`)
+- **Functions**: Use camelCase for function names (e.g., `createSubscription`)
+- **Types**: Use PascalCase for type names (e.g., `Subscription`, `List`)
+
+### Data validation
+
+All data operations must use Zod for runtime validation:
+
+```typescript
+import { z } from 'zod';
+
+const Zod_MySchema = z.object({
+  name: z.string().min(1),
+  amount: z.number().nonnegative(),
+});
+
+export const myAction = (args: unknown) => {
+  const validated = Zod_MySchema.safeParse(args);
+  if (!validated.success) {
+    logger.error('Invalid input', validated.error);
+    throw new Error('Invalid input');
+  }
+  // Use validated.data
+};
+```
+
+## Areas for contribution
+
+<CardGroup cols={2}>
+  <Card title="Features" icon="sparkles">
+    Add new features like cloud sync, export to CSV, or custom themes
+  </Card>
+  
+  <Card title="Bug fixes" icon="bug">
+    Fix bugs, improve error handling, or address edge cases
+  </Card>
+  
+  <Card title="Performance" icon="gauge-high">
+    Optimize rendering, reduce bundle size, or improve animations
+  </Card>
+  
+  <Card title="Documentation" icon="book">
+    Improve documentation, add examples, or fix typos
+  </Card>
+  
+  <Card title="Testing" icon="flask">
+    Add unit tests, integration tests, or E2E tests
+  </Card>
+  
+  <Card title="Accessibility" icon="universal-access">
+    Improve accessibility, screen reader support, or keyboard navigation
+  </Card>
+</CardGroup>
+
+## License
+
+By contributing to Recur, you agree that your contributions will be licensed under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html).
+
+<Info>
+  The GPL-3.0 license is a copyleft license that requires anyone who distributes your code or a derivative work to make the source available under the same terms.
+</Info>
+
+## Code of conduct
+
+Be respectful, constructive, and professional in all interactions. We want to maintain a welcoming and inclusive environment for all contributors.
+
+## Questions?
+
+If you have questions about contributing, feel free to:
+
+- Open an issue on GitHub
+- Check the [project structure documentation](/development/project-structure)
+- Review the [API reference](/api/subscriptions) for implementation details
+
+<Note>
+  Before starting work on a major feature, consider opening an issue first to discuss the approach and ensure it aligns with the project's direction.
+</Note>
