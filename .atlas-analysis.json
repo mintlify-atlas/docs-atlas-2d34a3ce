@@ -1,0 +1,114 @@
+{
+  "projectType": "saas",
+  "projectName": "Recur",
+  "projectDescription": "A local-first subscription tracker built with React Native and Expo for tracking recurring expenses with offline-friendly UI.",
+  "theme": "almond",
+  "primaryColor": "#59291A",
+  "lightColor": null,
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Get Started",
+        "groups": [
+          {
+            "group": "Introduction",
+            "pages": [
+              "introduction",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/architecture",
+              "concepts/data-models",
+              "concepts/local-storage"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Features",
+        "groups": [
+          {
+            "group": "User Guide",
+            "pages": [
+              "features/subscriptions",
+              "features/lists",
+              "features/dashboard",
+              "features/currency"
+            ]
+          },
+          {
+            "group": "Privacy & Data",
+            "pages": [
+              "features/privacy",
+              "features/data-storage"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Development",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "development/setup",
+              "development/project-structure"
+            ]
+          },
+          {
+            "group": "API Reference",
+            "pages": [
+              "api/subscriptions",
+              "api/lists",
+              "api/currency",
+              "api/user"
+            ]
+          },
+          {
+            "group": "Components",
+            "pages": [
+              "components/overview",
+              "components/dialogs",
+              "components/ui-primitives"
+            ]
+          },
+          {
+            "group": "Contributing",
+            "pages": [
+              "development/contributing",
+              "development/deployment"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Local-first subscription tracking with MMKV storage",
+    "Multi-currency support with 100+ currencies",
+    "Drag-and-drop subscription reordering",
+    "Custom list organization with unassigned view",
+    "Beautiful animated dashboard with monthly/yearly totals",
+    "Light and dark mode theming",
+    "Privacy-focused: no cloud sync, accounts, or tracking"
+  ],
+  "publicApiSurface": [
+    "createSubscription",
+    "updateSubscription",
+    "removeSubscription",
+    "getSubscriptions",
+    "saveSubscriptions",
+    "createList",
+    "updateList",
+    "removeList",
+    "getLists",
+    "setDefaultCurrency",
+    "getDefaultCurrency",
+    "setUserName",
+    "getUserName"
+  ]
+}
